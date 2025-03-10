@@ -1,0 +1,252 @@
+/* ----------------------------- 
+   Global Variables & Resets
+----------------------------- */
+:root {
+  --primary-color: #ffcc00;
+  --accent-color: #f7931a;
+  --accent-green: #27ae60;
+  --error-color: #e74c3c;
+  --background-color: #0d1117;
+  --card-background: #1e1e1e;
+  --text-color: #ffffff;
+  --subtext-color: #b0b0b0;
+  --font-family: "Poppins", sans-serif;
+  --transition-speed: 0.3s;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: #121212;
+  color: var(--text-color);
+}
+
+/* ----------------------------- 
+   History Container
+----------------------------- */
+.history-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 60px; /* Ensuring back button doesn't overlap */
+}
+
+/* ----------------------------- 
+   Back Button
+----------------------------- */
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: var(--accent-color);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+}
+
+.back-button:hover {
+  background: #e5a600;
+  transform: scale(1.05);
+}
+
+/* ----------------------------- 
+   History Page Box
+----------------------------- */
+.history-page {
+  max-width: 900px;
+  width: 90%;
+  background: var(--background-color);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  font-family: var(--font-family);
+}
+
+/* ----------------------------- 
+   Page Title
+----------------------------- */
+.record-title {
+  font-size: 36px;
+  margin-bottom: 30px;
+  color: var(--primary-color);
+}
+
+/* ----------------------------- 
+   Controls (Search, Filter)
+----------------------------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 6px;
+  background: var(--card-background);
+  color: var(--text-color);
+  font-size: 16px;
+}
+
+.filter-select {
+  padding: 10px;
+  border: 2px solid var(--accent-color);
+  border-radius: 6px;
+  background: var(--card-background);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* ----------------------------- 
+   History List
+----------------------------- */
+.history-list {
+  margin-top: 20px;
+}
+
+/* ----------------------------- 
+   History Row
+----------------------------- */
+.history-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card-background);
+  margin: 10px 0;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
+}
+
+.history-row:hover {
+  transform: scale(1.02);
+}
+
+/* ----------------------------- 
+   History Item
+----------------------------- */
+.history-item {
+  flex: 1;
+  min-width: 150px;
+  margin: 5px 10px;
+}
+
+.history-label {
+  font-size: 14px;
+  color: var(--subtext-color);
+  margin-bottom: 5px;
+}
+
+.history-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+/* ----------------------------- 
+   State & Result Styling
+----------------------------- */
+.history-state {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.history-state.win {
+  color: var(--accent-green);
+}
+
+.history-state.lose {
+  color: var(--error-color);
+}
+
+.history-result {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.history-result.result-red {
+  color: var(--error-color);
+}
+
+.history-result.result-small {
+  color: var(--accent-color);
+}
+
+/* ----------------------------- 
+   Error Message
+----------------------------- */
+.error-message {
+  font-size: 16px;
+  color: var(--subtext-color);
+  margin-top: 20px;
+}
+
+/* ----------------------------- 
+   Pagination
+----------------------------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.page-button {
+  padding: 10px 15px;
+  background: var(--card-background);
+  border: 2px solid var(--accent-color);
+  border-radius: 6px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background var(--transition-speed);
+}
+
+.page-button.active,
+.page-button:hover {
+  background: var(--accent-color);
+  color: #000;
+}
+
+/* ----------------------------- 
+   Responsive Design
+----------------------------- */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .search-bar,
+  .filter-select {
+    width: 100%;
+  }
+
+  .history-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-item {
+    min-width: 100%;
+  }
+}

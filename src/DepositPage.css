@@ -1,0 +1,100 @@
+/* Deposit Page Styles */
+
+:root {
+    --primary-color: #ffcc00;
+    --secondary-color: #0d1117;
+    --accent-orange: #f7931a;
+    --accent-blue: #627eea;
+    --font-family: "Poppins", sans-serif;
+    --transition-speed: 0.3s;
+  }
+  
+  body {
+    margin: 0;
+    font-family: var(--font-family);
+    background-color: #121212;
+    color: #fff;
+  }
+  
+  .deposit-container {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 40px 30px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    text-align: center;
+  }
+  
+  .back-button {
+    background: var(--accent-orange);
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+    transition: background var(--transition-speed);
+  }
+  .back-button:hover {
+    background: #e5a600;
+  }
+  
+  .page-title {
+    font-size: 30px;
+    margin-bottom: 25px;
+    color: var(--primary-color);
+  }
+  
+  .crypto-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  .crypto-button {
+    background: #333;
+    border: 2px solid var(--accent-orange);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background var(--transition-speed), transform 0.2s;
+  }
+  .crypto-button.selected,
+  .crypto-button:hover {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: #000;
+  }
+  
+  .crypto-details {
+    margin-top: 20px;
+    text-align: center;
+  }
+  .crypto-details h2 {
+    margin-top: 15px;
+    font-size: 22px;
+    color: var(--primary-color);
+  }
+  .crypto-address {
+    margin: 15px auto;
+    font-size: 16px;
+    background: #333;
+    padding: 10px;
+    border-radius: 8px;
+    word-break: break-all;
+  }
+  .network-info {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #ccc;
+  }
+  .network-type {
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--accent-blue);
+  }
+  
