@@ -1,156 +1,262 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./HistoryPage.css";
+import styled from "styled-components";
+
+const HistoryContainer = styled.div`
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 60px;
+  background-color: #121212;
+  color: #ffffff;
+  font-family: "Poppins", sans-serif;
+`;
+
+const BackButton = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #f7931a;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s, transform 0.3s;
+
+  &:hover {
+    background: #e5a600;
+    transform: scale(1.05);
+  }
+`;
+
+const HistoryPageContainer = styled.div`
+  max-width: 900px;
+  width: 90%;
+  background: #0d1117;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+  text-align: center;
+`;
+
+const RecordTitle = styled.h1`
+  font-size: 36px;
+  margin-bottom: 30px;
+  color: #ffcc00;
+`;
+
+const Controls = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const Input = styled.input`
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #f7931a;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: #ffffff;
+  font-size: 16px;
+`;
+
+const Select = styled.select`
+  padding: 10px;
+  border: 2px solid #f7931a;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+`;
+
+const HistoryList = styled.div`
+  margin-top: 20px;
+`;
+
+const HistoryRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e1e1e;
+  margin: 10px 0;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+`;
+
+const HistoryItem = styled.div`
+  flex: 1;
+  min-width: 150px;
+  margin: 5px 10px;
+`;
+
+const HistoryLabel = styled.p`
+  font-size: 14px;
+  color: #b0b0b0;
+  margin-bottom: 5px;
+`;
+
+const HistoryValue = styled.p`
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const HistoryState = styled.p`
+  font-size: 16px;
+  font-weight: bold;
+  color: ${(props) => (props.win ? "#27ae60" : "#e74c3c")};
+`;
+
+const HistoryResult = styled.p`
+  font-size: 16px;
+  font-weight: bold;
+  color: ${(props) => (props.result === "Big" || props.result === "RED" ? "#e74c3c" : "#f7931a")};
+`;
+
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+`;
+
+const PageButton = styled.button`
+  padding: 10px 15px;
+  background: #1e1e1e;
+  border: 2px solid #f7931a;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.3s;
+
+  &.active,
+  &:hover {
+    background: #f7931a;
+    color: #000;
+  }
+`;
+
+const ErrorMessage = styled.p`
+  font-size: 16px;
+  color: #b0b0b0;
+  margin-top: 20px;
+`;
 
 function HistoryPage() {
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Items per page
+  const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterState, setFilterState] = useState("All"); // Filter by state (Win/Lose/All)
-  const baseIssue = 2345; // Base issue number if not provided
+  const [filterState, setFilterState] = useState("All");
+  const baseIssue = 2345;
 
   useEffect(() => {
     const storedHistory = JSON.parse(localStorage.getItem("betHistory")) || [];
-    // Add default values for missing fields
     const formattedHistory = storedHistory.map((entry) => ({
-      issue: entry.issue || baseIssue, // Default to baseIssue if issue is missing
-      state: entry.state || "Lose", // Default to "Lose" if state is missing
-      result: entry.result ? entry.result.toString() : "Small", // Ensure result is a string
-      timestamp: entry.timestamp || new Date().toLocaleString(), // Default to current time if timestamp is missing
+      issue: entry.issue || baseIssue,
+      state: entry.state || "Lose",
+      result: entry.result ? entry.result.toString() : "Small",
+      timestamp: entry.timestamp || new Date().toLocaleString(),
     }));
     setHistory(formattedHistory);
     setFilteredHistory(formattedHistory);
   }, []);
 
-  // Filter history
   useEffect(() => {
     let filtered = history;
 
-    // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter((entry) => {
-        const issue = entry.issue || ""; // Default to empty string if issue is undefined
-        const result = entry.result ? entry.result.toString() : ""; // Ensure result is a string
-        return (
-          issue.toString().includes(searchQuery) ||
-          result.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      });
+      filtered = filtered.filter((entry) =>
+        entry.issue.toString().includes(searchQuery) ||
+        entry.result.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
-    // Filter by state
     if (filterState !== "All") {
       filtered = filtered.filter((entry) => entry.state === filterState);
     }
 
     setFilteredHistory(filtered);
-    setCurrentPage(1); // Reset to first page after filtering
+    setCurrentPage(1);
   }, [searchQuery, filterState, history]);
 
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   return (
-    <div className="history-container">
-      {/* Back Button */}
-      <button className="back-button" onClick={() => navigate("/")}>
-        Back
-      </button>
+    <HistoryContainer>
+      <BackButton onClick={() => navigate("/")}>Back</BackButton>
 
-      <div className="history-page">
-        <h1 className="record-title">Record</h1>
+      <HistoryPageContainer>
+        <RecordTitle>Record</RecordTitle>
 
-        {/* Controls (Search, Filter) */}
-        <div className="controls">
-          <input
+        <Controls>
+          <Input
             type="text"
             placeholder="Search by issue or result..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-bar"
           />
-          <select
-            value={filterState}
-            onChange={(e) => setFilterState(e.target.value)}
-            className="filter-select"
-          >
+          <Select value={filterState} onChange={(e) => setFilterState(e.target.value)}>
             <option value="All">All</option>
             <option value="Win">Win</option>
             <option value="Lose">Lose</option>
-          </select>
-        </div>
+          </Select>
+        </Controls>
 
-        {/* History List */}
-        <div className="history-list">
+        <HistoryList>
           {currentItems.length === 0 ? (
-            <p className="error-message">No betting history found.</p>
+            <ErrorMessage>No betting history found.</ErrorMessage>
           ) : (
             currentItems.map((entry, index) => (
-              <div key={index} className="history-row">
-                <div className="history-item">
-                  <p className="history-label">Issue</p>
-                  <p className="history-value">
-                    {entry.issue}
-                  </p>
-                </div>
-                <div className="history-item">
-                  <p className="history-label">State</p>
-                  <p
-                    className={`history-state ${
-                      entry.state === "Win" ? "win" : "lose"
-                    }`}
-                  >
-                    {entry.state}
-                  </p>
-                </div>
-                <div className="history-item">
-                  <p className="history-label">Time</p>
-                  <p className="history-value">{entry.timestamp}</p>
-                </div>
-                <div className="history-item">
-                  <p className="history-label">Result</p>
-                  <p
-                    className={`history-result ${
-                      entry.result === "Big" || entry.result === "RED"
-                        ? "result-red"
-                        : "result-small"
-                    }`}
-                  >
-                    {entry.result}
-                  </p>
-                </div>
-              </div>
+              <HistoryRow key={index}>
+                <HistoryItem>
+                  <HistoryLabel>Issue</HistoryLabel>
+                  <HistoryValue>{entry.issue}</HistoryValue>
+                </HistoryItem>
+                <HistoryItem>
+                  <HistoryLabel>State</HistoryLabel>
+                  <HistoryState win={entry.state === "Win"}>{entry.state}</HistoryState>
+                </HistoryItem>
+                <HistoryItem>
+                  <HistoryLabel>Time</HistoryLabel>
+                  <HistoryValue>{entry.timestamp}</HistoryValue>
+                </HistoryItem>
+                <HistoryItem>
+                  <HistoryLabel>Result</HistoryLabel>
+                  <HistoryResult result={entry.result}>{entry.result}</HistoryResult>
+                </HistoryItem>
+              </HistoryRow>
             ))
           )}
-        </div>
+        </HistoryList>
 
-        {/* Pagination */}
-        <div className="pagination">
-          {Array.from(
-            { length: Math.ceil(filteredHistory.length / itemsPerPage) },
-            (_, i) => (
-              <button
-                key={i + 1}
-                onClick={() => paginate(i + 1)}
-                className={`page-button ${
-                  currentPage === i + 1 ? "active" : ""
-                }`}
-              >
-                {i + 1}
-              </button>
-            )
-          )}
-        </div>
-      </div>
-    </div>
+        <Pagination>
+          {Array.from({ length: Math.ceil(filteredHistory.length / itemsPerPage) }, (_, i) => (
+            <PageButton key={i + 1} onClick={() => setCurrentPage(i + 1)} className={currentPage === i + 1 ? "active" : ""}>
+              {i + 1}
+            </PageButton>
+          ))}
+        </Pagination>
+      </HistoryPageContainer>
+    </HistoryContainer>
   );
 }
 
