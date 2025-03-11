@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEye, FaEyeSlash, FaBitcoin, FaHistory, FaGift, FaLifeRing, FaUserFriends } from "react-icons/fa"; // Import necessary icons
-import "./Home.css";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaBitcoin,
+  FaHistory,
+  FaGift,
+  FaLifeRing,
+  FaUserFriends,
+} from "react-icons/fa";
+import { MdNotifications } from "react-icons/md";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -10,9 +18,10 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-
-  // Dummy balance data
   const [usdtBalance, setUsdtBalance] = useState(0.07);
+
+  // Responsive check
+  const isMobile = window.innerWidth < 768;
 
   // Fetch market data for top cryptocurrencies
   useEffect(() => {
@@ -77,45 +86,413 @@ function HomePage() {
     setIsBalanceVisible(!isBalanceVisible);
   };
 
+  // Inline styles based on provided CSS with adjustments for responsiveness and brand color
+  const styles = {
+    homeContainer: {
+      width: "100%",
+      maxWidth: "1200px",
+      margin: "0 auto",
+      padding: "10px",
+      fontFamily: "'Roboto', sans-serif",
+      backgroundColor: "#1a1a1a",
+      color: "#ffffff",
+      lineHeight: 1.6,
+    },
+    // Top Header (Transparent) with Brand + Bell Icon
+    topHeader: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "16px 24px",
+      marginBottom: "20px",
+    },
+    brandContainer: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    brandLogo: {
+      fontSize: isMobile ? "20px" : "28px",
+      fontWeight: "bold",
+      color: "#f7931a",
+    },
+    // Adjusted brandText color to white (you can change it as needed)
+    brandText: {
+      fontSize: isMobile ? "18px" : "24px",
+      fontWeight: "bold",
+      color: "#ffffff",
+    },
+    bellContainer: {
+      position: "relative",
+      cursor: "pointer",
+    },
+    bellIcon: {
+      fontSize: "24px",
+      color: "#ffffff",
+    },
+    bellDot: {
+      position: "absolute",
+      top: "0px",
+      right: "-5px",
+      width: "10px",
+      height: "10px",
+      background: "red",
+      borderRadius: "50%",
+      border: "2px solid transparent",
+    },
+    // Banner Section (Balances & Free Plans)
+    bannerContainer: {
+      display: "grid",
+      gridTemplateColumns: isMobile
+        ? "1fr"
+        : "repeat(auto-fit, minmax(320px, 1fr))",
+      gap: "10px",
+      marginBottom: "20px",
+    },
+    card: {
+      background: "#2c2c2c",
+      border: "1px solid #3b3b3b",
+      borderRadius: "12px",
+      padding: "15px",
+      textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      transition: "transform 0.35s ease, boxShadow 0.35s ease",
+    },
+    // Balance Card Section
+    balanceCard: {
+      background: "#2c2c2c",
+      borderRadius: "8px",
+      padding: isMobile ? "4px" : "6px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      transition: "transform 0.35s ease, boxShadow 0.35s ease",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    balanceRow: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "4px",
+    },
+    balanceTitle: {
+      fontSize: "12px",
+      fontWeight: 600,
+      color: "#ff6f61",
+      marginBottom: "2px",
+    },
+    balanceItem: {
+      marginBottom: "3px",
+    },
+    balanceIcon: {
+      fontSize: "18px",
+      color: "#ff6f61",
+      marginBottom: "2px",
+    },
+    balanceLabel: {
+      fontSize: "10px",
+      color: "#cccccc",
+      marginBottom: "1px",
+    },
+    balanceValueContainer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "2px",
+    },
+    balanceValue: {
+      fontSize: "14px",
+      fontWeight: "bold",
+      color: "#ff6f61",
+    },
+    eyeButton: {
+      background: "none",
+      border: "none",
+      color: "#ff6f61",
+      cursor: "pointer",
+      fontSize: "12px",
+      display: "flex",
+      alignItems: "center",
+    },
+    balanceActions: {
+      display: "flex",
+      gap: "4px",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      marginTop: "4px",
+    },
+    actionButton: {
+      background: "#ff6f61",
+      color: "#ffffff",
+      border: "none",
+      padding: "6px 10px",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: 600,
+      transition: "background 0.35s ease, transform 0.35s ease",
+      minWidth: "80px",
+      fontSize: "12px",
+    },
+    withdrawButton: {
+      background: "#f44336",
+    },
+    depositButton: {
+      background: "#4caf50",
+    },
+    // Free Plans Card Section
+    freePlansCard: {
+      background: "#2c2c2c",
+      border: "1px solid #3b3b3b",
+      borderRadius: "12px",
+      padding: isMobile ? "10px" : "15px",
+      textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      transition: "transform 0.35s ease, boxShadow 0.35s ease",
+    },
+    freePlansTitle: {
+      fontSize: "20px",
+      fontWeight: 600,
+      marginBottom: "8px",
+      color: "#ff6f61",
+    },
+    freePlansText: {
+      fontSize: "16px",
+      marginBottom: "12px",
+      color: "#cccccc",
+    },
+    explorePlansButton: {
+      background: "linear-gradient(135deg, #ff6f61, #ffc371)",
+      border: "none",
+      color: "#ffffff",
+      padding: "10px 20px",
+      borderRadius: "8px",
+      cursor: "pointer",
+      fontWeight: "bold",
+      fontSize: "16px",
+      transition: "transform 0.3s ease, background 0.3s ease",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      marginTop: "10px",
+      display: "inline-block",
+    },
+    // Quick Options Section
+    quickOptions: {
+      background: "#2c2c2c",
+      border: "1px solid #3b3b3b",
+      borderRadius: "12px",
+      padding: "15px",
+      textAlign: "center",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      marginBottom: "20px",
+      transition: "transform 0.35s ease, boxShadow 0.35s ease",
+    },
+    quickOptionsTitle: {
+      fontSize: "20px",
+      fontWeight: 600,
+      marginBottom: "10px",
+      color: "#ff6f61",
+    },
+    quickButtons: {
+      display: "flex",
+      flexWrap: "wrap",
+      justifyContent: "center",
+      gap: "8px",
+    },
+    quickOption: {
+      background: "#ff6f61",
+      color: "#ffffff",
+      borderRadius: "8px",
+      padding: "10px",
+      width: "80px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      cursor: "pointer",
+      transition: "background 0.35s ease, transform 0.35s ease",
+    },
+    quickIcon: {
+      fontSize: "24px",
+      marginBottom: "4px",
+    },
+    quickLabel: {
+      fontSize: "12px",
+      textAlign: "center",
+    },
+    // Market Overview Section
+    marketOverview: {
+      background: "#2c2c2c",
+      border: "1px solid #3b3b3b",
+      borderRadius: "12px",
+      padding: "20px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      marginBottom: "20px",
+    },
+    marketOverviewTitle: {
+      textAlign: "center",
+      marginBottom: "12px",
+      fontSize: "28px",
+      color: "#ff6f61",
+      letterSpacing: "0.5px",
+    },
+    marketControls: {
+      display: "flex",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "15px",
+    },
+    searchBar: {
+      display: "flex",
+      alignItems: "center",
+      background: "#3b3b3b",
+      padding: "8px",
+      border: "1px solid #3b3b3b",
+      borderRadius: "8px",
+      flex: 1,
+      minWidth: "220px",
+      marginRight: "8px",
+    },
+    searchBarInput: {
+      background: "transparent",
+      border: "none",
+      color: "#ffffff",
+      marginLeft: "8px",
+      width: "100%",
+      fontSize: "16px",
+      outline: "none",
+    },
+    refreshButton: {
+      background: "#3b3b3b",
+      color: "#ffffff",
+      border: "1px solid #3b3b3b",
+      padding: "8px",
+      borderRadius: "8px",
+      cursor: "pointer",
+      transition: "transform 0.35s ease, background 0.35s ease",
+    },
+    marketList: {
+      display: "grid",
+      gridTemplateColumns: isMobile
+        ? "1fr"
+        : "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "15px",
+    },
+    marketItem: {
+      background: "#3b3b3b",
+      border: "1px solid #3b3b3b",
+      borderRadius: "12px",
+      padding: "12px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      transition: "transform 0.35s ease",
+    },
+    coinInfo: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    coinIcon: {
+      width: "40px",
+      height: "40px",
+      borderRadius: "50%",
+      objectFit: "cover",
+    },
+    coinName: {
+      fontWeight: 600,
+      color: "#ffffff",
+    },
+    coinPrice: {
+      fontSize: "16px",
+      color: "#ffffff",
+    },
+    coinChange: {
+      fontWeight: "bold",
+      fontSize: "16px",
+    },
+    viewAllButton: {
+      background: "#ff6f61",
+      border: "none",
+      color: "#ffffff",
+      padding: "10px 20px",
+      borderRadius: "8px",
+      cursor: "pointer",
+      fontWeight: 600,
+      transition: "background 0.35s ease, transform 0.35s ease",
+      display: "block",
+      margin: "15px auto 0",
+    },
+    // Footer
+    footer: {
+      background: "#2c2c2c",
+      borderTop: "1px solid #3b3b3b",
+      padding: "15px",
+      textAlign: "center",
+      marginTop: "20px",
+      borderRadius: "8px",
+    },
+    footerLinks: {
+      marginTop: "8px",
+    },
+    footerLink: {
+      color: "#ff6f61",
+      margin: "0 8px",
+      textDecoration: "none",
+      transition: "color 0.35s ease",
+    },
+    loadingSpinner: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "180px",
+      fontSize: "18px",
+      color: "#ff6f61",
+    },
+  };
+
   return (
-    <div className="home-container">
-      {/* Header */}
-      <header className="header">
-        <h1>Crypto Games</h1>
-      </header>
+    <div style={styles.homeContainer}>
+      {/* Top Header with Brand and Bell */}
+      <div style={styles.topHeader}>
+        <div style={styles.brandContainer}>
+          <span style={styles.brandLogo}>QC</span>
+          <span style={styles.brandText}>QuickCash</span>
+        </div>
+        <div style={styles.bellContainer}>
+          <MdNotifications style={styles.bellIcon} />
+          <div style={styles.bellDot} />
+        </div>
+      </div>
 
       {/* Main Content */}
-      <main className="main-content">
-        {/* Balances & Free Plans */}
-        <div className="banner-container">
-          <div className="balance-card card">
-            <div className="balance-row">
-              <div className="balance-column">
-                <p className="balance-title">Your Balance</p>
-                <div className="balance-item">
-                  <span className="balance-icon">💰</span>
-                  <p className="balance-label">USDT</p>
-                  <div className="balance-value-container">
-                    <p className="balance-value">
+      <main>
+        {/* Banner Section (Balances & Free Plans) */}
+        <div style={styles.bannerContainer}>
+          {/* Balance Card */}
+          <div style={styles.card}>
+            <div style={styles.balanceCard}>
+              <div style={styles.balanceRow}>
+                <p style={styles.balanceTitle}>Your Balance</p>
+                <div style={styles.balanceItem}>
+                  <span style={styles.balanceIcon}>💰</span>
+                  <p style={styles.balanceLabel}>USDT</p>
+                  <div style={styles.balanceValueContainer}>
+                    <p style={styles.balanceValue}>
                       {isBalanceVisible ? usdtBalance.toFixed(2) : "****"}
                     </p>
-                    <button
-                      className="eye-button"
-                      onClick={toggleBalanceVisibility}
-                    >
+                    <button style={styles.eyeButton} onClick={toggleBalanceVisibility}>
                       {isBalanceVisible ? <FaEyeSlash /> : <FaEye />}
                     </button>
                   </div>
                 </div>
-                <div className="balance-actions">
+                <div style={styles.balanceActions}>
                   <button
-                    className="action-button withdraw-button"
+                    style={{ ...styles.actionButton, ...styles.withdrawButton }}
                     onClick={() => navigate("/withdraw")}
                   >
                     Withdraw
                   </button>
                   <button
-                    className="action-button deposit-button"
+                    style={{ ...styles.actionButton, ...styles.depositButton }}
                     onClick={() => navigate("/deposit")}
                   >
                     Deposit
@@ -124,108 +501,138 @@ function HomePage() {
               </div>
             </div>
           </div>
-          <div className="free-plans-card card">
-            <p className="card-title">Free Plans</p>
-            <p>Earn rewards daily with Free Plans!</p>
-            <button
-              className="action-button"
-              onClick={() => navigate("/free-plans")}
-            >
-              Explore Plans
-            </button>
+
+          {/* Free Plans Card */}
+          <div style={styles.card}>
+            <div style={styles.freePlansCard}>
+              <p style={styles.freePlansTitle}>Free Plans</p>
+              <p style={styles.freePlansText}>Earn rewards daily with Free Plans!</p>
+              <button
+                style={styles.explorePlansButton}
+                onClick={() => navigate("/free-plans")}
+              >
+                Explore Plans
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Quick Options Section */}
-        <div className="quick-options card">
-          <p className="card-title">Quick Options</p>
-          <div className="quick-buttons">
-            <div className="quick-option" onClick={() => navigate("/btc-game")}>
-              <FaBitcoin className="quick-icon" />
-              <p className="quick-label">BTC Game</p>
+        <div style={styles.quickOptions}>
+          <p style={styles.quickOptionsTitle}>Quick Options</p>
+          <div style={styles.quickButtons}>
+            <div
+              style={styles.quickOption}
+              onClick={() => navigate("/btc-game")}
+            >
+              <FaBitcoin style={styles.quickIcon} />
+              <p style={styles.quickLabel}>BTC Game</p>
             </div>
-            <div className="quick-option" onClick={() => navigate("/history")}>
-              <FaHistory className="quick-icon" />
-              <p className="quick-label">History</p>
+            <div
+              style={styles.quickOption}
+              onClick={() => navigate("/history")}
+            >
+              <FaHistory style={styles.quickIcon} />
+              <p style={styles.quickLabel}>History</p>
             </div>
-            <div className="quick-option" onClick={() => navigate("/rewards")}>
-              <FaGift className="quick-icon" />
-              <p className="quick-label">Rewards</p>
+            <div
+              style={styles.quickOption}
+              onClick={() => navigate("/rewards")}
+            >
+              <FaGift style={styles.quickIcon} />
+              <p style={styles.quickLabel}>Rewards</p>
             </div>
-            <div className="quick-option" onClick={() => navigate("/help-desk")}>
-              <FaLifeRing className="quick-icon" />
-              <p className="quick-label">Help Desk</p>
+            <div
+              style={styles.quickOption}
+              onClick={() => navigate("/help-desk")}
+            >
+              <FaLifeRing style={styles.quickIcon} />
+              <p style={styles.quickLabel}>Help Desk</p>
             </div>
-            <div className="quick-option" onClick={() => navigate("/referral")}>
-              <FaUserFriends className="quick-icon" />
-              <p className="quick-label">Referral</p>
+            <div
+              style={styles.quickOption}
+              onClick={() => navigate("/referral")}
+            >
+              <FaUserFriends style={styles.quickIcon} />
+              <p style={styles.quickLabel}>Referral</p>
             </div>
           </div>
         </div>
 
         {/* Market Overview */}
-        <div className="market-overview">
-          <h2>Market Overview</h2>
-          <div className="market-controls">
-            <div className="search-bar">
+        <div style={styles.marketOverview}>
+          <h2 style={styles.marketOverviewTitle}>Market Overview</h2>
+          <div style={styles.marketControls}>
+            <div style={styles.searchBar}>
               <input
                 type="text"
                 placeholder="Search coins..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                style={styles.searchBarInput}
               />
-              <button className="refresh-button" onClick={handleRefresh}>
+              <button style={styles.refreshButton} onClick={handleRefresh}>
                 🔄 Refresh
               </button>
             </div>
           </div>
           {loading ? (
-            <div className="loading-spinner">Loading...</div>
+            <div style={styles.loadingSpinner}>Loading...</div>
           ) : (
-            <div className="market-list">
+            <div style={styles.marketList}>
               {filteredMarketData.length > 0 ? (
-                filteredMarketData.map((coin) => (
-                  <div key={coin.id} className="market-item">
-                    <div className="coin-info">
-                      <img
-                        src={coin.image}
-                        alt={coin.name}
-                        className="coin-icon"
-                      />
-                      <span className="coin-name">{coin.name}</span>
+                filteredMarketData.map((coin) => {
+                  const coinChangeStyle = {
+                    ...styles.coinChange,
+                    color:
+                      coin.price_change_percentage_24h >= 0 ? "#52c41a" : "#f5222d",
+                  };
+
+                  return (
+                    <div key={coin.id} style={styles.marketItem}>
+                      <div style={styles.coinInfo}>
+                        <img
+                          src={coin.image}
+                          alt={coin.name}
+                          style={styles.coinIcon}
+                        />
+                        <span style={styles.coinName}>{coin.name}</span>
+                      </div>
+                      <div>
+                        <p style={styles.coinPrice}>
+                          ${coin.current_price.toLocaleString()}
+                        </p>
+                        <p style={coinChangeStyle}>
+                          {coin.price_change_percentage_24h.toFixed(2)}%
+                        </p>
+                      </div>
                     </div>
-                    <div className="coin-details">
-                      <p className="coin-price">
-                        ${coin.current_price.toLocaleString()}
-                      </p>
-                      <p
-                        className={`coin-change ${
-                          coin.price_change_percentage_24h >= 0 ? "positive" : "negative"
-                        }`}
-                      >
-                        {coin.price_change_percentage_24h.toFixed(2)}%
-                      </p>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p>No coins found.</p>
               )}
             </div>
           )}
-          <button className="view-all-button" onClick={() => navigate("/market")}>
+          <button style={styles.viewAllButton} onClick={() => navigate("/market")}>
             View All Coins
           </button>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="footer">
-        <p>© 2023 Crypto Games. All rights reserved.</p>
-        <div className="footer-links">
-          <a href="/terms">Terms</a>
-          <a href="/privacy">Privacy</a>
-          <a href="/contact">Contact</a>
+      <footer style={styles.footer}>
+        <p>© 2023 QuickCash. All rights reserved.</p>
+        <div style={styles.footerLinks}>
+          <a href="/terms" style={styles.footerLink}>
+            Terms
+          </a>
+          <a href="/privacy" style={styles.footerLink}>
+            Privacy
+          </a>
+          <a href="/contact" style={styles.footerLink}>
+            Contact
+          </a>
         </div>
       </footer>
     </div>
