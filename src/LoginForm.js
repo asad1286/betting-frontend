@@ -2,20 +2,43 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
-  const [loginEmail, setLoginEmail] = useState("");
+  const [loginInput, setLoginInput] = useState(""); // Stores email or phone
   const [loginPassword, setLoginPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Check if the input appears to be an email or a phone number
+  const isEmail = loginInput.includes("@") || loginInput.includes(".");
+  const isPhone = /^\d+$/.test(loginInput) && loginInput.length >= 8;
+  // Determine the input type for mobile keyboards
+  const inputFieldType =
+    loginInput === ""
+      ? "text"
+      : isEmail
+      ? "email"
+      : isPhone
+      ? "tel"
+      : "text";
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!loginEmail || !loginPassword) {
-      setError("Please fill in all fields.");
+
+    if (!loginInput) {
+      setError("Please enter your email or phone number.");
       return;
     }
+    if (!isEmail && !isPhone) {
+      setError("Enter a valid email or phone number.");
+      return;
+    }
+    if (!loginPassword) {
+      setError("Please enter your password.");
+      return;
+    }
+
     setError("");
-    console.log("Logging in with:", loginEmail, loginPassword);
-    
+    console.log("Logging in with:", { loginInput, loginPassword });
+
     // Simulate login API call
     setTimeout(() => {
       navigate("/"); // Navigate to home page after login
@@ -102,24 +125,50 @@ const LoginForm = () => {
       fontSize: "14px",
       padding: 0,
     },
+    forgotContainer: {
+      textAlign: "center",
+      marginTop: "10px",
+    },
+    forgotLink: {
+      background: "none",
+      border: "none",
+      color: "#ff6f61",
+      textDecoration: "underline",
+      cursor: "pointer",
+      fontSize: "14px",
+      padding: 0,
+    },
   };
 
   return (
     <div style={styles.container}>
+      {/* Custom focus style */}
+      <style>
+        {`
+          input:focus {
+            outline: none;
+            box-shadow: 0 0 5px 2px rgba(255, 111, 97, 0.8);
+            border: 1px solid #ff6f61;
+          }
+        `}
+      </style>
       <div style={styles.bonusBanner}>
         🎉 New Users: Deposit & Get a 10% Bonus! 🎉
       </div>
       <h1 style={styles.title}>Login</h1>
       {error && <div style={styles.error}>{error}</div>}
       <form onSubmit={handleSubmit} style={styles.form}>
-        <label style={styles.label}>Email</label>
+        {/* Single Input for Email or Phone */}
+        <label style={styles.label}>Email or Phone Number</label>
         <input
           style={styles.input}
-          type="email"
-          placeholder="Enter your email"
-          value={loginEmail}
-          onChange={(e) => setLoginEmail(e.target.value)}
+          type={inputFieldType}
+          placeholder="Enter your email or phone number"
+          value={loginInput}
+          onChange={(e) => setLoginInput(e.target.value)}
         />
+
+        {/* Password Input */}
         <label style={styles.label}>Password</label>
         <input
           style={styles.input}
@@ -128,6 +177,8 @@ const LoginForm = () => {
           value={loginPassword}
           onChange={(e) => setLoginPassword(e.target.value)}
         />
+
+        {/* Login Button */}
         <button
           style={styles.button}
           type="submit"
@@ -137,6 +188,18 @@ const LoginForm = () => {
           Login
         </button>
       </form>
+
+      {/* Forgot Password Link */}
+      <div style={styles.forgotContainer}>
+        <button
+          style={styles.forgotLink}
+          onClick={() => navigate("/forgot-password")}
+        >
+          Forgot Password?
+        </button>
+      </div>
+
+      {/* Register Link */}
       <div style={styles.switchContainer}>
         <span style={{ color: "#ccc" }}>Don't have an account? </span>
         <button style={styles.switchLink} onClick={() => navigate("/register")}>
