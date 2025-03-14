@@ -6,12 +6,13 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  Title,
+  Title as ChartTitle,
   Tooltip,
   Legend,
 } from "chart.js";
-import { FaArrowLeft, FaCoins, FaHistory } from "react-icons/fa";
+import { FaCoins, FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { Table, Button, message, Input, Space } from "antd";
 import "./BtcPage.css";
 
 ChartJS.register(
@@ -19,7 +20,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Title,
+  ChartTitle,
   Tooltip,
   Legend
 );
@@ -32,14 +33,24 @@ function BtcPage() {
   const [betAmount, setBetAmount] = useState("");
   const [bet, setBet] = useState(null);
   const [startPrice, setStartPrice] = useState(null);
-  const [countdown, setCountdown] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [balance, setBalance] = useState({ USDT: 1000 });
   const [betHistory, setBetHistory] = useState([]);
   const [betResult, setBetResult] = useState(null);
+  const [roundOrder, setRoundOrder] = useState(1);
+  const [isBettingOpen, setIsBettingOpen] = useState(true);
+  const [hasPlacedBet, setHasPlacedBet] = useState(false); // Track if the user has placed a bet
+  const [inlineError, setInlineError] = useState(""); // Inline error message for second bet attempt
 
+  // Load bet history from localStorage on mount.
+  useEffect(() => {
+    const storedHistory = JSON.parse(localStorage.getItem("betHistory")) || [];
+    setBetHistory(storedHistory);
+  }, []);
+
+  // WebSocket connection for live BTC price.
   useEffect(() => {
     const ws = new WebSocket("wss://stream.binance.com/ws/btcusdt@trade");
-
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const livePrice = parseFloat(data.p);
@@ -48,62 +59,133 @@ function BtcPage() {
         prev.length > 50 ? [...prev.slice(1), livePrice] : [...prev, livePrice]
       );
     };
-
     return () => ws.close();
   }, []);
 
+  // Continuous countdown timer that runs independently.
   useEffect(() => {
-    const storedHistory = JSON.parse(localStorage.getItem("betHistory")) || [];
-    setBetHistory(storedHistory);
-  }, []);
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          processRound();
+          return 60; // Reset timer to 60 seconds
+        }
+        return prev - 1;
+      });
 
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
+      // Disable betting in the last 15 seconds
+      if (timeLeft === 15) {
+        setIsBettingOpen(false);
+        message.warning("Betting is closed for this round!");
+      }
+    }, 1000);
 
-  const placeBet = (direction) => {
-    if (!betAmount || isNaN(betAmount) || betAmount <= 0 || betAmount > balance.USDT) {
-      alert("Invalid bet amount.");
-      return;
-    }
+    return () => clearInterval(timer);
+  }, [timeLeft]);
 
-    setBalance((prev) => ({ ...prev, USDT: prev.USDT - betAmount }));
-    setBet(direction);
-    setStartPrice(btcPrice);
-    setBetResult(null);
-    setCountdown(60);
-
-    setTimeout(() => {
-      const result = btcPrice > startPrice ? "up" : "down";
-      const isWin = result === direction;
-      const payout = isWin ? betAmount * 1.95 : 0;
-
+  // Process the current round when timer hits 0.
+  const processRound = () => {
+    // If a bet was placed, compute the result. Otherwise, record a "No Bet" round.
+    if (bet !== null) {
+      const endPrice = btcPrice; // live BTC price at round end.
+      const result = endPrice > startPrice ? "up" : "down";
+      const isWin = result === bet;
+      const payout = isWin ? Number(betAmount) * 1.95 : 0;
       if (isWin) {
         setBalance((prev) => ({ ...prev, USDT: prev.USDT + payout }));
       }
-
-      const newHistory = [
-        ...betHistory,
-        {
-          bet: direction.toUpperCase(),
-          amount: betAmount,
-          currency: "USDT",
-          startPrice,
-          endPrice: btcPrice,
-          result: isWin ? `✅ Won (${payout.toFixed(2)} USDT)` : "❌ Lost",
-          timestamp: new Date().toLocaleString(),
-          state: isWin ? "Win" : "Lose",
-          issue: `#${Math.floor(Math.random() * 100000)}`,
-        },
-      ];
-
+      setBetResult(isWin ? `✅ You Won! (+${payout.toFixed(2)} USDT)` : "❌ You Lost!");
+      const newRecord = {
+        order: roundOrder,
+        bet: bet.toUpperCase(),
+        amount: Number(betAmount),
+        currency: "USDT",
+        startPrice,
+        endPrice,
+        result: isWin ? `✅ Won (${payout.toFixed(2)} USDT)` : "❌ Lost",
+        timestamp: new Date().toLocaleString(),
+        state: isWin ? "Win" : "Lose",
+        issue: `#${Math.floor(Math.random() * 100000)}`,
+      };
+      const newHistory = [...betHistory, newRecord];
       setBetHistory(newHistory);
       localStorage.setItem("betHistory", JSON.stringify(newHistory));
-      setBetResult(isWin ? `✅ You Won! (+${payout.toFixed(2)} USDT)` : "❌ You Lost!");
-    }, 60000);
+
+      // Show result for 2 seconds, then hide it
+      setTimeout(() => {
+        setBetResult(null);
+      }, 2000);
+    } else {
+      // If no bet was placed, clear any bet result.
+      setBetResult(null);
+    }
+    // Prepare for the next round:
+    setBet(null);
+    setBetAmount("");
+    setStartPrice(null);
+    setRoundOrder((prev) => prev + 1);
+    setIsBettingOpen(true); // Re-enable betting for the next round
+    setHasPlacedBet(false); // Reset bet placement status for the next round
+    setInlineError(""); // Clear inline error message
+  };
+
+  // When a bet is placed, deduct balance and record bet.
+  const placeBetAction = (direction) => {
+    if (!isBettingOpen) {
+      message.error("Betting is closed for this round!");
+      return;
+    }
+    if (hasPlacedBet) {
+      setInlineError("You have already placed a bet for this round!"); // Show inline error
+      return;
+    }
+    if (
+      !betAmount ||
+      isNaN(betAmount) ||
+      betAmount <= 0 ||
+      betAmount > balance.USDT
+    ) {
+      alert("Invalid bet amount.");
+      return;
+    }
+    setBalance((prev) => ({ ...prev, USDT: prev.USDT - Number(betAmount) }));
+    setBet(direction);
+    setStartPrice(btcPrice);
+    setBetResult(null);
+    setHasPlacedBet(true); // Mark that the user has placed a bet
+    setInlineError(""); // Clear inline error message
+  };
+
+  const historyColumns = [
+    { title: "Order No.", dataIndex: "order", key: "order" },
+    { title: "Bet", dataIndex: "bet", key: "bet" },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      render: (amt) => `${amt} USDT`,
+    },
+    {
+      title: "Start Price",
+      dataIndex: "startPrice",
+      key: "startPrice",
+      render: (p) => `$${p != null ? p.toFixed(2) : "0.00"}`,
+    },
+    {
+      title: "End Price",
+      dataIndex: "endPrice",
+      key: "endPrice",
+      render: (p) => `$${p != null ? p.toFixed(2) : "0.00"}`,
+    },
+    { title: "Result", dataIndex: "result", key: "result" },
+    { title: "Timestamp", dataIndex: "timestamp", key: "timestamp" },
+    { title: "Issue", dataIndex: "issue", key: "issue" },
+  ];
+
+  const clearBetHistory = () => {
+    setBetHistory([]);
+    localStorage.removeItem("betHistory");
+    message.success("Bet history cleared");
   };
 
   return (
@@ -116,7 +198,13 @@ function BtcPage() {
 
       <div className="live-btc-price">
         <span>Live BTC Price:</span>
-        <span className={`price ${btcPrice > startPrice ? "green" : "red"}`}>
+        <span
+          className={`price ${
+            btcPrice && startPrice != null && btcPrice > startPrice
+              ? "green"
+              : "red"
+          }`}
+        >
           ${btcPrice ? btcPrice.toFixed(2) : "Loading..."}
         </span>
       </div>
@@ -135,7 +223,12 @@ function BtcPage() {
                   const chart = context.chart;
                   const { ctx, chartArea } = chart;
                   if (!chartArea) return null;
-                  const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                  const gradient = ctx.createLinearGradient(
+                    0,
+                    chartArea.top,
+                    0,
+                    chartArea.bottom
+                  );
                   gradient.addColorStop(0, "rgba(255, 111, 97, 0.5)");
                   gradient.addColorStop(1, "rgba(255, 111, 97, 0)");
                   return gradient;
@@ -177,20 +270,41 @@ function BtcPage() {
         </div>
 
         <div className="bet-buttons">
-          <button className="bet-button up" onClick={() => placeBet("up")}>
+          <button
+            className="bet-button up"
+            onClick={() => placeBetAction("up")}
+            disabled={!isBettingOpen || hasPlacedBet} // Disable if betting is closed or user has already placed a bet
+          >
             Bet UP 📈
           </button>
-          <button className="bet-button down" onClick={() => placeBet("down")}>
+          <button
+            className="bet-button down"
+            onClick={() => placeBetAction("down")}
+            disabled={!isBettingOpen || hasPlacedBet} // Disable if betting is closed or user has already placed a bet
+          >
             Bet DOWN 📉
           </button>
         </div>
 
-        {bet && (
-          <div className="bet-status">
-            Your Bet: {bet.toUpperCase()} | Time Left: {countdown}s
-          </div>
-        )}
+        {inlineError && <div className="inline-error">{inlineError}</div>}
+
+        <div className="bet-status">
+          Time Left: {timeLeft}s {!isBettingOpen && "(Betting Closed)"}
+        </div>
         {betResult && <div className="bet-result">{betResult}</div>}
+      </div>
+
+      <div className="bet-history-container">
+        <h2>Bet History</h2>
+        <Button onClick={clearBetHistory} style={{ marginBottom: 10 }}>
+          Clear History
+        </Button>
+        <Table
+          dataSource={betHistory}
+          columns={historyColumns}
+          pagination={{ pageSize: 5 }}
+          rowKey="order"
+        />
       </div>
     </div>
   );

@@ -38,7 +38,7 @@ body {
 .btc-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 100px 20px 80px; /* Extra top & bottom padding for full visibility */
+  padding: 100px 20px 80px;
   text-align: center;
 }
 
@@ -117,11 +117,11 @@ body {
 ----------------------------- */
 .chart-container {
   max-width: 700px;
-  margin: 0 auto 20px;
+  margin: 20px auto 20px;
   background: var(--secondary-color);
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.2);
+  box-shadow: var(--shadow-hover);
   height: 300px;
   border: 1px solid var(--border-color);
 }
@@ -134,7 +134,7 @@ body {
   padding: 20px;
   background: #161b22;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(255, 165, 0, 0.2);
+  box-shadow: var(--shadow-hover);
   display: inline-block;
   width: 90%;
   max-width: 500px;
@@ -259,6 +259,20 @@ body {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* ----------------------------- 
+   Bet History Container
+----------------------------- */
+.bet-history-container {
+  margin-top: 40px;
+  padding: 20px;
+  background: #161b22;
+  border-radius: 12px;
+  box-shadow: var(--shadow-hover);
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ----------------------------- 

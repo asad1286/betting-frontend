@@ -8,6 +8,8 @@ import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import BtcPage from "./BtcPage";
 import FreePlans from "./FreePlans";
+import HistoryPage from "./HistoryPage";
+import WithdrawPage from "./WithdrawPage";
 
 function App() {
   return (
@@ -19,8 +21,11 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/invite" element={<InvitePage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/trade" element={<BtcPage />} />
+          <Route path="/btc-page" element={<BtcPage />} />
           <Route path="/free-plans" element={<FreePlans />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/withdraw" element={<WithdrawPage />} />
+          <Route path="/trade" element={<Navigate to="/btc-page" replace />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 

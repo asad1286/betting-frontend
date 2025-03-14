@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./WithdrawPage.css";
 
 function WithdrawPage() {
   const navigate = useNavigate();
@@ -15,7 +14,8 @@ function WithdrawPage() {
 
   // Compute a transaction fee (1% fee)
   const fee = amount && !isNaN(amount) ? Number(amount) * 0.01 : 0;
-  const finalAmount = amount && !isNaN(amount) ? Number(amount) - fee : 0;
+  const finalAmount =
+    amount && !isNaN(amount) ? Number(amount) - fee : 0;
 
   const handleValidation = () => {
     if (!amount || !walletAddress || !withdrawPassword) {
@@ -44,9 +44,10 @@ function WithdrawPage() {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (handleValidation()) {
-      // Show a confirmation modal before processing withdrawal
+      // Show confirmation modal before processing withdrawal
       setConfirmModalVisible(true);
     }
   };
@@ -55,16 +56,15 @@ function WithdrawPage() {
     setConfirmModalVisible(false);
     setIsSubmitting(true);
 
-    // Simulate an API call (or processing)
+    // Simulate API call or processing delay
     setTimeout(() => {
       alert(
-        `Withdrawal confirmed:\nAmount: ${amount} ${currency}\nFee: ${fee.toFixed(
-          2
-        )} ${currency}\nFinal Amount: ${finalAmount.toFixed(
-          2
-        )} ${currency}\nWallet: ${walletAddress}\nRemarks: ${
-          remarks || "None"
-        }`
+        `Withdrawal confirmed:
+Amount: ${amount} ${currency}
+Fee: ${fee.toFixed(2)} ${currency}
+Final Amount: ${finalAmount.toFixed(2)} ${currency}
+Wallet: ${walletAddress}
+Remarks: ${remarks || "None"}`
       );
       setIsSubmitting(false);
       // Clear form fields after success
@@ -76,8 +76,216 @@ function WithdrawPage() {
   };
 
   return (
-    <div>
-      {/* Back button fixed on top left */}
+    <>
+      {/* Inject CSS via a style tag */}
+      <style>{`
+        /* Define CSS Variables */
+        :root {
+          --primary-color: #ffcc00;
+          --secondary-color: #0d1117;
+          --accent-orange: #f7931a;
+          --accent-blue: #627eea;
+          --accent-green: #28a745;
+          --error-color: #e74c3c;
+          --font-family: "Poppins", sans-serif;
+          --transition-speed: 0.3s;
+        }
+
+        /* Global Reset & Base Font */
+        *,
+        *::before,
+        *::after {
+          box-sizing: border-box;
+        }
+        body {
+          margin: 0;
+          font-family: var(--font-family);
+          background-color: #121212;
+          color: #fff;
+        }
+
+        /* Back Button - fixed on top left */
+        .back-button {
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          background: var(--accent-orange);
+          color: #000;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: background var(--transition-speed);
+          z-index: 1100;
+        }
+        .back-button:hover {
+          background: #e5a600;
+        }
+
+        /* Withdraw Container */
+        .withdraw-container {
+          max-width: 500px;
+          margin: 60px auto;
+          padding: 40px 30px;
+          background: #1e1e1e;
+          border-radius: 12px;
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+          text-align: center;
+        }
+
+        /* Page Title */
+        .page-title {
+          font-size: 30px;
+          margin-bottom: 25px;
+          color: var(--primary-color);
+        }
+
+        /* Crypto Selector */
+        .crypto-selector {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-bottom: 25px;
+        }
+        .crypto-button {
+          background: #333;
+          border: 2px solid var(--accent-orange);
+          color: #fff;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: background-color var(--transition-speed), transform 0.2s;
+        }
+        .crypto-button.selected,
+        .crypto-button:hover {
+          background: var(--accent-orange);
+          border-color: var(--accent-orange);
+          color: #000;
+        }
+
+        /* Withdraw Form */
+        .withdraw-form {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          text-align: left;
+        }
+        .input-group {
+          display: flex;
+          flex-direction: column;
+        }
+        .input-group label {
+          margin-bottom: 8px;
+          font-size: 16px;
+          font-weight: 500;
+          color: #ccc;
+        }
+        .input-group input {
+          padding: 12px;
+          border: 2px solid #333;
+          border-radius: 8px;
+          font-size: 16px;
+          background: #000;
+          color: #fff;
+          transition: border-color var(--transition-speed);
+        }
+        .input-group input:focus {
+          outline: none;
+          border-color: var(--accent-orange);
+        }
+
+        /* Fee Info */
+        .fee-info {
+          text-align: left;
+          font-size: 14px;
+          color: #ccc;
+        }
+
+        /* Error Message */
+        .error-message {
+          color: var(--error-color);
+          font-size: 14px;
+          text-align: center;
+          margin-top: -5px;
+        }
+
+        /* Withdraw Button */
+        .withdraw-button {
+          background: var(--accent-green);
+          color: #fff;
+          border: none;
+          padding: 14px 20px;
+          border-radius: 8px;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background var(--transition-speed), transform 0.2s;
+          margin-top: 10px;
+        }
+        .withdraw-button:hover {
+          background: #218838;
+          transform: scale(1.02);
+        }
+
+        /* Confirmation Modal */
+        .confirm-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        .modal-content {
+          background: #1e1e1e;
+          padding: 30px;
+          border-radius: 12px;
+          width: 90%;
+          max-width: 400px;
+          text-align: left;
+        }
+        .modal-content h2 {
+          margin-top: 0;
+          color: var(--primary-color);
+        }
+        .modal-content p {
+          margin: 10px 0;
+          font-size: 16px;
+          color: #ccc;
+        }
+        .modal-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 20px;
+        }
+        .modal-button {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 6px;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background var(--transition-speed);
+        }
+        .modal-button.cancel {
+          background: var(--accent-orange);
+          color: #000;
+        }
+        .modal-button.cancel:hover {
+          background: #e5a600;
+        }
+        .modal-button.confirm {
+          background: var(--accent-green);
+          color: #fff;
+        }
+        .modal-button.confirm:hover {
+          background: #218838;
+        }
+      `}</style>
       <button className="back-button" onClick={() => navigate("/")}>
         &larr; Back
       </button>
@@ -145,7 +353,6 @@ function WithdrawPage() {
             />
           </div>
 
-          {/* Always show Remarks field */}
           <div className="input-group">
             <label htmlFor="remarks">Remarks (optional):</label>
             <input
@@ -215,7 +422,7 @@ function WithdrawPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

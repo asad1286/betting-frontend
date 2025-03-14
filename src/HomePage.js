@@ -18,7 +18,12 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const [usdtBalance, setUsdtBalance] = useState(0.07);
+  const [usdtBalance, setUsdtBalance] = useState(1000.0);
+  const [announcements, setAnnouncements] = useState([
+    "Welcome to QuickCash! Enjoy our exclusive rewards.",
+    "Check out our Free Plans to earn daily bonuses.",
+    "Refer your friends and get extra benefits!",
+  ]);
 
   // Responsive check
   const isMobile = window.innerWidth < 768;
@@ -57,36 +62,12 @@ function HomePage() {
     coin.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle refresh button click
-  const handleRefresh = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        "https://api.coingecko.com/api/v3/coins/markets",
-        {
-          params: {
-            vs_currency: "usd",
-            order: "market_cap_desc",
-            per_page: 4,
-            page: 1,
-            sparkline: false,
-          },
-        }
-      );
-      setMarketData(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error refreshing market data:", error);
-      setLoading(false);
-    }
-  };
-
   // Toggle balance visibility
   const toggleBalanceVisibility = () => {
     setIsBalanceVisible(!isBalanceVisible);
   };
 
-  // Inline styles based on provided CSS with adjustments for responsiveness and brand color
+  // Inline styles
   const styles = {
     homeContainer: {
       width: "100%",
@@ -95,10 +76,9 @@ function HomePage() {
       padding: "10px",
       fontFamily: "'Roboto', sans-serif",
       backgroundColor: "#1a1a1a",
-      color: "#ffffff",
+      color: "#fff",
       lineHeight: 1.6,
     },
-    // Top Header (Transparent) with Brand + Bell Icon
     topHeader: {
       display: "flex",
       alignItems: "center",
@@ -116,7 +96,6 @@ function HomePage() {
       fontWeight: "bold",
       color: "#f7931a",
     },
-    // Adjusted brandText color to white (you can change it as needed)
     brandText: {
       fontSize: isMobile ? "18px" : "24px",
       fontWeight: "bold",
@@ -140,7 +119,6 @@ function HomePage() {
       borderRadius: "50%",
       border: "2px solid transparent",
     },
-    // Banner Section (Balances & Free Plans)
     bannerContainer: {
       display: "grid",
       gridTemplateColumns: isMobile
@@ -158,7 +136,6 @@ function HomePage() {
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
       transition: "transform 0.35s ease, boxShadow 0.35s ease",
     },
-    // Balance Card Section
     balanceCard: {
       background: "#2c2c2c",
       borderRadius: "8px",
@@ -239,7 +216,6 @@ function HomePage() {
     depositButton: {
       background: "#4caf50",
     },
-    // Free Plans Card Section
     freePlansCard: {
       background: "#2c2c2c",
       border: "1px solid #3b3b3b",
@@ -274,7 +250,6 @@ function HomePage() {
       marginTop: "10px",
       display: "inline-block",
     },
-    // Quick Options Section
     quickOptions: {
       background: "#2c2c2c",
       border: "1px solid #3b3b3b",
@@ -317,7 +292,6 @@ function HomePage() {
       fontSize: "12px",
       textAlign: "center",
     },
-    // Market Overview Section
     marketOverview: {
       background: "#2c2c2c",
       border: "1px solid #3b3b3b",
@@ -359,15 +333,6 @@ function HomePage() {
       width: "100%",
       fontSize: "16px",
       outline: "none",
-    },
-    refreshButton: {
-      background: "#3b3b3b",
-      color: "#ffffff",
-      border: "1px solid #3b3b3b",
-      padding: "8px",
-      borderRadius: "8px",
-      cursor: "pointer",
-      transition: "transform 0.35s ease, background 0.35s ease",
     },
     marketList: {
       display: "grid",
@@ -421,7 +386,6 @@ function HomePage() {
       display: "block",
       margin: "15px auto 0",
     },
-    // Footer
     footer: {
       background: "#2c2c2c",
       borderTop: "1px solid #3b3b3b",
@@ -447,11 +411,30 @@ function HomePage() {
       fontSize: "18px",
       color: "#ff6f61",
     },
+    // Additional Promotion / Announcements Section
+    announcementsContainer: {
+      background: "#333",
+      padding: "10px",
+      borderRadius: "8px",
+      marginBottom: "20px",
+      overflow: "hidden",
+      position: "relative",
+    },
+    announcementsText: {
+      color: "#ffcc00",
+      fontSize: "16px",
+      whiteSpace: "nowrap",
+      animation: "scroll 15s linear infinite",
+    },
+    "@keyframes scroll": {
+      from: { transform: "translateX(100%)" },
+      to: { transform: "translateX(-100%)" },
+    },
   };
 
   return (
     <div style={styles.homeContainer}>
-      {/* Top Header with Brand and Bell */}
+      {/* Top Header */}
       <div style={styles.topHeader}>
         <div style={styles.brandContainer}>
           <span style={styles.brandLogo}>QC</span>
@@ -463,162 +446,173 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <main>
-        {/* Banner Section (Balances & Free Plans) */}
-        <div style={styles.bannerContainer}>
-          {/* Balance Card */}
-          <div style={styles.card}>
-            <div style={styles.balanceCard}>
-              <div style={styles.balanceRow}>
-                <p style={styles.balanceTitle}>Your Balance</p>
-                <div style={styles.balanceItem}>
-                  <span style={styles.balanceIcon}>💰</span>
-                  <p style={styles.balanceLabel}>USDT</p>
-                  <div style={styles.balanceValueContainer}>
-                    <p style={styles.balanceValue}>
-                      {isBalanceVisible ? usdtBalance.toFixed(2) : "****"}
-                    </p>
-                    <button style={styles.eyeButton} onClick={toggleBalanceVisibility}>
-                      {isBalanceVisible ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
-                <div style={styles.balanceActions}>
+      {/* Announcements Section */}
+      <div style={styles.announcementsContainer}>
+        <p style={styles.announcementsText}>
+          {announcements.join(" • ")}
+        </p>
+      </div>
+
+      {/* Banner Section */}
+      <div style={styles.bannerContainer}>
+        {/* Balance Card */}
+        <div style={styles.card}>
+          <div style={styles.balanceCard}>
+            <div style={styles.balanceRow}>
+              <p style={styles.balanceTitle}>Your Balance</p>
+              <div style={styles.balanceItem}>
+                <span style={styles.balanceIcon}>💰</span>
+                <p style={styles.balanceLabel}>USDT</p>
+                <div style={styles.balanceValueContainer}>
+                  <p style={styles.balanceValue}>
+                    {isBalanceVisible ? usdtBalance.toFixed(2) : "****"}
+                  </p>
                   <button
-                    style={{ ...styles.actionButton, ...styles.withdrawButton }}
-                    onClick={() => navigate("/withdraw")}
+                    style={styles.eyeButton}
+                    onClick={() => setIsBalanceVisible(!isBalanceVisible)}
                   >
-                    Withdraw
-                  </button>
-                  <button
-                    style={{ ...styles.actionButton, ...styles.depositButton }}
-                    onClick={() => navigate("/deposit")}
-                  >
-                    Deposit
+                    {isBalanceVisible ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Free Plans Card */}
-          <div style={styles.card}>
-            <div style={styles.freePlansCard}>
-              <p style={styles.freePlansTitle}>Free Plans</p>
-              <p style={styles.freePlansText}>Earn rewards daily with Free Plans!</p>
-              <button
-                style={styles.explorePlansButton}
-                onClick={() => navigate("/free-plans")}
-              >
-                Explore Plans
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Options Section */}
-        <div style={styles.quickOptions}>
-          <p style={styles.quickOptionsTitle}>Quick Options</p>
-          <div style={styles.quickButtons}>
-            <div
-              style={styles.quickOption}
-              onClick={() => navigate("/btc-game")}
-            >
-              <FaBitcoin style={styles.quickIcon} />
-              <p style={styles.quickLabel}>BTC Game</p>
-            </div>
-            <div
-              style={styles.quickOption}
-              onClick={() => navigate("/history")}
-            >
-              <FaHistory style={styles.quickIcon} />
-              <p style={styles.quickLabel}>History</p>
-            </div>
-            <div
-              style={styles.quickOption}
-              onClick={() => navigate("/rewards")}
-            >
-              <FaGift style={styles.quickIcon} />
-              <p style={styles.quickLabel}>Rewards</p>
-            </div>
-            <div
-              style={styles.quickOption}
-              onClick={() => navigate("/help-desk")}
-            >
-              <FaLifeRing style={styles.quickIcon} />
-              <p style={styles.quickLabel}>Help Desk</p>
-            </div>
-            <div
-              style={styles.quickOption}
-              onClick={() => navigate("/referral")}
-            >
-              <FaUserFriends style={styles.quickIcon} />
-              <p style={styles.quickLabel}>Referral</p>
+              <div style={styles.balanceActions}>
+                <button
+                  style={{ ...styles.actionButton, ...styles.withdrawButton }}
+                  onClick={() => navigate("/withdraw")}
+                >
+                  Withdraw
+                </button>
+                <button
+                  style={{ ...styles.actionButton, ...styles.depositButton }}
+                  onClick={() => navigate("/deposit")}
+                >
+                  Deposit
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Market Overview */}
-        <div style={styles.marketOverview}>
-          <h2 style={styles.marketOverviewTitle}>Market Overview</h2>
-          <div style={styles.marketControls}>
-            <div style={styles.searchBar}>
-              <input
-                type="text"
-                placeholder="Search coins..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={styles.searchBarInput}
-              />
-              <button style={styles.refreshButton} onClick={handleRefresh}>
-                🔄 Refresh
-              </button>
-            </div>
+        {/* Free Plans Card */}
+        <div style={styles.card}>
+          <div style={styles.freePlansCard}>
+            <p style={styles.freePlansTitle}>Free Plans</p>
+            <p style={styles.freePlansText}>
+              Earn rewards daily with Free Plans!
+            </p>
+            <button
+              style={styles.explorePlansButton}
+              onClick={() => navigate("/free-plans")}
+            >
+              Explore Plans
+            </button>
           </div>
-          {loading ? (
-            <div style={styles.loadingSpinner}>Loading...</div>
-          ) : (
-            <div style={styles.marketList}>
-              {filteredMarketData.length > 0 ? (
-                filteredMarketData.map((coin) => {
-                  const coinChangeStyle = {
-                    ...styles.coinChange,
-                    color:
-                      coin.price_change_percentage_24h >= 0 ? "#52c41a" : "#f5222d",
-                  };
+        </div>
+      </div>
 
-                  return (
-                    <div key={coin.id} style={styles.marketItem}>
-                      <div style={styles.coinInfo}>
-                        <img
-                          src={coin.image}
-                          alt={coin.name}
-                          style={styles.coinIcon}
-                        />
-                        <span style={styles.coinName}>{coin.name}</span>
-                      </div>
-                      <div>
-                        <p style={styles.coinPrice}>
-                          ${coin.current_price.toLocaleString()}
-                        </p>
-                        <p style={coinChangeStyle}>
-                          {coin.price_change_percentage_24h.toFixed(2)}%
-                        </p>
-                      </div>
+      {/* Quick Options Section */}
+      <div style={styles.quickOptions}>
+        <p style={styles.quickOptionsTitle}>Quick Options</p>
+        <div style={styles.quickButtons}>
+          <div
+            style={styles.quickOption}
+            onClick={() => navigate("/btc-page")}
+          >
+            <FaBitcoin style={styles.quickIcon} />
+            <p style={styles.quickLabel}>BTC Game</p>
+          </div>
+          <div
+            style={styles.quickOption}
+            onClick={() => navigate("/history")}
+          >
+            <FaHistory style={styles.quickIcon} />
+            <p style={styles.quickLabel}>History</p>
+          </div>
+          <div
+            style={styles.quickOption}
+            onClick={() => navigate("/rewards")}
+          >
+            <FaGift style={styles.quickIcon} />
+            <p style={styles.quickLabel}>Rewards</p>
+          </div>
+          <div
+            style={styles.quickOption}
+            onClick={() => navigate("/help-desk")}
+          >
+            <FaLifeRing style={styles.quickIcon} />
+            <p style={styles.quickLabel}>Help Desk</p>
+          </div>
+          <div
+            style={styles.quickOption}
+            onClick={() => navigate("/referral")}
+          >
+            <FaUserFriends style={styles.quickIcon} />
+            <p style={styles.quickLabel}>Referral</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Market Overview Section */}
+      <div style={styles.marketOverview}>
+        <h2 style={styles.marketOverviewTitle}>Market Overview</h2>
+        <div style={styles.marketControls}>
+          <div style={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="Search coins..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={styles.searchBarInput}
+            />
+          </div>
+        </div>
+        {loading ? (
+          <div style={styles.loadingSpinner}>Loading...</div>
+        ) : (
+          <div style={styles.marketList}>
+            {filteredMarketData.length > 0 ? (
+              filteredMarketData.map((coin) => {
+                const coinChangeStyle = {
+                  color:
+                    coin.price_change_percentage_24h >= 0
+                      ? "#52c41a"
+                      : "#f5222d",
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                };
+                return (
+                  <div key={coin.id} style={styles.marketItem}>
+                    <div style={styles.coinInfo}>
+                      <img
+                        src={coin.image}
+                        alt={coin.name}
+                        style={styles.coinIcon}
+                      />
+                      <span style={styles.coinName}>{coin.name}</span>
                     </div>
-                  );
-                })
-              ) : (
-                <p>No coins found.</p>
-              )}
-            </div>
-          )}
-          <button style={styles.viewAllButton} onClick={() => navigate("/market")}>
-            View All Coins
-          </button>
-        </div>
-      </main>
+                    <div>
+                      <p style={styles.coinPrice}>
+                        ${coin.current_price.toLocaleString()}
+                      </p>
+                      <p style={coinChangeStyle}>
+                        {coin.price_change_percentage_24h.toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p>No coins found.</p>
+            )}
+          </div>
+        )}
+        <button
+          style={styles.viewAllButton}
+          onClick={() => navigate("/market")}
+        >
+          View All Coins
+        </button>
+      </div>
 
       {/* Footer */}
       <footer style={styles.footer}>
