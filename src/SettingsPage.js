@@ -19,10 +19,9 @@ function SettingsPage() {
     navigate("/login");
   };
 
-  // Navigate to edit profile
-  const handleEditProfile = () => {
-    alert("Navigating to Edit Profile...");
-    navigate("/edit-profile"); // Adjust the route as needed
+  // Navigate to profile page when profile section is clicked
+  const handleProfileClick = () => {
+    navigate("/profile");
   };
 
   // Inline styles derived from your CSS
@@ -42,6 +41,7 @@ function SettingsPage() {
       marginBottom: "16px",
       textAlign: "center",
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      cursor: "pointer", // indicates clickable area
     },
     profileHeader: {
       marginBottom: "8px",
@@ -105,9 +105,6 @@ function SettingsPage() {
       cursor: "pointer",
       transition: "background 0.3s ease",
     },
-    menuButtonHover: {
-      background: "#1f1f1f",
-    },
     menuIcon: {
       fontSize: "18px",
       color: "#cccccc",
@@ -119,15 +116,21 @@ function SettingsPage() {
 
   return (
     <div style={styles.container}>
-      {/* Top User Info */}
-      <div style={styles.profileSection}>
+      {/* Top User Info - now clickable */}
+      <div style={styles.profileSection} onClick={handleProfileClick}>
         <div style={styles.profileHeader}>
           <MdAccountCircle style={styles.profileIcon} />
           <h2 style={styles.profileName}>John Doe</h2>
           <p style={styles.profileDetail}>hksharma@gmail.com</p>
           <p style={styles.profileDetail}>UID: 10082321</p>
           <p style={styles.profileDetail}>VIP 1</p>
-          <button style={styles.editProfileBtn} onClick={handleEditProfile}>
+          <button
+            style={styles.editProfileBtn}
+            onClick={(e) => {
+              e.stopPropagation(); // prevent event bubbling
+              handleProfileClick();
+            }}
+          >
             <MdEdit style={{ fontSize: "16px" }} />
             Edit Profile
           </button>
