@@ -4,6 +4,7 @@ import HomePage from "./HomePage";
 import InvitePage from "./InvitePage";
 import SettingsPage from "./SettingsPage";
 import UserProfile from "./UserProfile"; // New profile page component
+import TransactionsPage from "./TransactionsPage"; // New transactions page component
 import BottomNav from "./BottomNav";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
@@ -22,7 +23,8 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/invite" element={<InvitePage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/profile" element={<UserProfile />} /> {/* Added profile route */}
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/btc-page" element={<BtcPage />} />
           <Route path="/free-plans" element={<FreePlans />} />
           <Route path="/history" element={<HistoryPage />} />

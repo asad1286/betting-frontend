@@ -436,15 +436,15 @@ function HomePage() {
     <div style={styles.homeContainer}>
       {/* Top Header */}
       <div style={styles.topHeader}>
-        <div style={styles.brandContainer}>
-          <span style={styles.brandLogo}>QC</span>
-          <span style={styles.brandText}>QuickCash</span>
-        </div>
-        <div style={styles.bellContainer}>
-          <MdNotifications style={styles.bellIcon} />
-          <div style={styles.bellDot} />
-        </div>
-      </div>
+  <div style={styles.brandContainer}>
+    <span style={styles.brandLogo}>QC</span>
+    <span style={styles.brandText}>QuickCash</span>
+  </div>
+  <div style={styles.bellContainer} onClick={() => navigate("/transactions")}>
+    <MdNotifications style={styles.bellIcon} />
+    <div style={styles.bellDot} />
+  </div>
+</div>
 
       {/* Announcements Section */}
       <div style={styles.announcementsContainer}>
