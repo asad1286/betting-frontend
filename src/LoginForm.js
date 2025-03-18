@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./contextApi/AuthContext";
 
 const LoginForm = () => {
   const [loginInput, setLoginInput] = useState(""); // Stores email or phone
   const [loginPassword, setLoginPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const {login}=useAuth()
 
   // Check if the input appears to be an email or a phone number
   const isEmail = loginInput.includes("@") || loginInput.includes(".");
   const isPhone = /^\d+$/.test(loginInput) && loginInput.length >= 8;
+
   // Determine the input type for mobile keyboards
   const inputFieldType =
     loginInput === ""
@@ -20,125 +23,137 @@ const LoginForm = () => {
       ? "tel"
       : "text";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!loginInput) {
-      setError("Please enter your email or phone number.");
-      return;
-    }
-    if (!isEmail && !isPhone) {
-      setError("Enter a valid email or phone number.");
-      return;
-    }
-    if (!loginPassword) {
-      setError("Please enter your password.");
-      return;
-    }
-
-    setError("");
-    console.log("Logging in with:", { loginInput, loginPassword });
-
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+      
+        if (!loginInput) {
+          setError("Please enter your email or phone number.");
+          return;
+        }
+        if (!isEmail && !isPhone) {
+          setError("Enter a valid email or phone number.");
+          return;
+        }
+        if (!loginPassword) {
+          setError("Please enter your password.");
+          return;
+        }
+      
+        setError(""); // Reset error message
+      
+        const response = await login(loginInput, loginPassword);
+      
+        if (response.status === 200) {
+          // Navigate to home page after login if response is successful
+          setTimeout(() => {
+            navigate("/"); // Navigate to home page after login
+          }, 1000);
+        } else {
+          // Show error message from the backend
+          setError(response.message);
+        }
+      };
+      
+      
     // Simulate login API call
-    setTimeout(() => {
-      navigate("/"); // Navigate to home page after login
-    }, 1000);
-  };
 
-  const styles = {
-    container: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      padding: "40px",
-      background: "linear-gradient(135deg, #2c2c2c, #1a1a1a)",
-      borderRadius: "12px",
-      boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
-      width: "100%",
-      maxWidth: "400px",
-      color: "#fff",
-      margin: "40px auto",
-      animation: "fadeIn 0.8s ease-in-out",
-    },
-    title: {
-      fontSize: "32px",
-      marginBottom: "20px",
-      textAlign: "center",
-      color: "#ff6f61",
-      fontWeight: "700",
-    },
-    bonusBanner: {
-      background: "#ff6f61",
-      color: "#fff",
-      padding: "10px",
-      borderRadius: "8px",
-      textAlign: "center",
-      fontWeight: "bold",
-      marginBottom: "20px",
-    },
-    form: {
-      width: "100%",
-      display: "flex",
-      flexDirection: "column",
-      gap: "16px",
-      textAlign: "left",
-    },
-    label: {
-      fontSize: "14px",
-      color: "#ccc",
-    },
-    input: {
-      width: "100%",
-      padding: "12px",
-      fontSize: "16px",
-      border: "none",
-      borderRadius: "6px",
-      background: "#333",
-      color: "#fff",
-    },
-    button: {
-      width: "100%",
-      padding: "12px",
-      fontSize: "18px",
-      background: "#ff6f61",
-      border: "none",
-      borderRadius: "6px",
-      color: "#fff",
-      cursor: "pointer",
-      transition: "background 0.35s ease, transform 0.35s ease",
-    },
-    error: {
-      color: "#ff6f61",
-      fontSize: "14px",
-      textAlign: "center",
-    },
-    switchContainer: {
-      marginTop: "20px",
-      textAlign: "center",
-    },
-    switchLink: {
-      background: "none",
-      border: "none",
-      color: "#ff6f61",
-      textDecoration: "underline",
-      cursor: "pointer",
-      fontSize: "14px",
-      padding: 0,
-    },
-    forgotContainer: {
-      textAlign: "center",
-      marginTop: "10px",
-    },
-    forgotLink: {
-      background: "none",
-      border: "none",
-      color: "#ff6f61",
-      textDecoration: "underline",
-      cursor: "pointer",
-      fontSize: "14px",
-      padding: 0,
-    },
-  };
+    const styles = {
+      container: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "40px",
+        background: "linear-gradient(135deg, #2c2c2c, #1a1a1a)",
+        borderRadius: "12px",
+        boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
+        width: "100%",
+        maxWidth: "400px",
+        color: "#fff",
+        margin: "40px auto",
+        animation: "fadeIn 0.8s ease-in-out",
+      },
+      title: {
+        fontSize: "32px",
+        marginBottom: "20px",
+        textAlign: "center",
+        color: "#ff6f61",
+        fontWeight: "700",
+      },
+      bonusBanner: {
+        background: "#ff6f61",
+        color: "#fff",
+        padding: "10px",
+        borderRadius: "8px",
+        textAlign: "center",
+        fontWeight: "bold",
+        marginBottom: "20px",
+      },
+      form: {
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px", // Reduced gap between form elements
+        textAlign: "left",
+      },
+      label: {
+        fontSize: "14px",
+        color: "#ccc",
+        marginBottom: "-7px", // Reduced margin between label and input
+      },
+      input: {
+        width: "100%",
+        padding: "10px", // Reduced padding for input field
+        fontSize: "16px",
+        border: "none",
+        borderRadius: "6px",
+        background: "#333",
+        color: "#fff",
+      },
+      button: {
+        width: "100%",
+        padding: "12px",
+        fontSize: "18px",
+        background: "#ff6f61",
+        border: "none",
+        borderRadius: "6px",
+        color: "#fff",
+        cursor: "pointer",
+        transition: "background 0.35s ease, transform 0.35s ease",
+      },
+      error: {
+        color: "#ff6f61",
+        fontSize: "14px",
+        marginBottom:"5px",
+        textAlign: "center",
+      },
+      switchContainer: {
+        marginTop: "20px",
+        textAlign: "center",
+      },
+      switchLink: {
+        background: "none",
+        border: "none",
+        color: "#ff6f61",
+        textDecoration: "underline",
+        cursor: "pointer",
+        fontSize: "14px",
+        padding: 0,
+      },
+      forgotContainer: {
+        textAlign: "center",
+        marginTop: "10px",
+      },
+      forgotLink: {
+        background: "none",
+        border: "none",
+        color: "#ff6f61",
+        textDecoration: "underline",
+        cursor: "pointer",
+        fontSize: "14px",
+        padding: 0,
+      },
+    };
+    
 
   return (
     <div style={styles.container}>

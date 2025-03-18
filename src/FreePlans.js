@@ -1,401 +1,288 @@
-import React, { useState, useEffect } from "react";
-import { FaCheckCircle, FaInfoCircle, FaQuoteLeft, FaQuestionCircle, FaSun, FaMoon, FaShareAlt } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { usePlans } from "./contextApi/PlanContext";
+import { FaCheckCircle, FaSun, FaMoon, FaQuoteLeft, FaQuestionCircle, FaTimes } from "react-icons/fa";
+import axios from "axios";
+import axiosInstance from "./AxiosInstance";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// Define global styles as a JavaScript object
 const globalStyles = {
-  root: {
-    "--primary-color": "#ff6f61",
-    "--secondary-color": "#ffffff",
-    "--accent-gradient": "linear-gradient(135deg, #ff6f61, #ffc371)",
-    "--text-color": "#333333",
-    "--bg-color": "#1a1a1a",
-    "--border-color": "#3b3b3b",
-    "--transition-speed": "0.35s",
-    "--shadow-light": "0 4px 12px rgba(0, 0, 0, 0.08)",
-    "--shadow-hover": "0 8px 20px rgba(0, 0, 0, 0.15)",
-    "--button-bg-color": "#ff6f61",
-    "--button-hover-bg": "#ff867c",
-    "--error-color": "#f44336",
-    "--success-color": "#4caf50",
-    "--info-color": "#2196f3",
+  dark: {
+    backgroundColor: "#1a1a1a",
+    color: "#ffffff",
+    primary: "#ff6f61",
+    buttonBg: "#ff6f61",
+    buttonHover: "#ff867c",
+    borderRadius: "12px",
+    transition: "0.3s ease",
   },
-  body: {
-    fontFamily: "'Roboto', sans-serif",
-    background: "var(--bg-color)",
-    color: "var(--secondary-color)",
-    lineHeight: 1.6,
-    WebkitFontSmoothing: "antialiased",
-  },
-  a: {
-    color: "var(--primary-color)",
-    textDecoration: "none",
-    transition: "color var(--transition-speed) ease",
-  },
-  aHover: {
-    color: "var(--button-hover-bg)",
+  light: {
+    backgroundColor: "#f5f5f5",
+    color: "#333",
   },
 };
 
-// Plans data
-const plans = [
-  {
-    id: 1,
-    name: "Simple",
-    price: 5,
-    reward: 0.5,
-    duration: "30 days",
-    dailyEarnings: 0.08,
-    usefulTips: [
-      "The AI plan must be started after purchase to work.",
-      "The AI plan is paused if the initial deposit is refunded.",
-      "An inactive AI plan can be gifted.",
-    ],
-    badge: "",
-  },
-  {
-    id: 2,
-    name: "Pro",
-    price: 10,
-    reward: 1.0,
-    duration: "30 days",
-    dailyEarnings: 0.16,
-    usefulTips: [
-      "The AI plan must be started after purchase to work.",
-      "The AI plan is paused if the initial deposit is refunded.",
-      "An inactive AI plan can be gifted.",
-    ],
-    badge: "Most Popular",
-  },
-  {
-    id: 3,
-    name: "Premium",
-    price: 20,
-    reward: 2.0,
-    duration: "30 days",
-    dailyEarnings: 0.32,
-    usefulTips: [
-      "The AI plan must be started after purchase to work.",
-      "The AI plan is paused if the initial deposit is refunded.",
-      "An inactive AI plan can be gifted.",
-    ],
-    badge: "Best Value",
-  },
-  {
-    id: 4,
-    name: "Diamond",
-    price: 50,
-    reward: 5.0,
-    duration: "30 days",
-    dailyEarnings: 0.8,
-    usefulTips: [
-      "The AI plan must be started after purchase to work.",
-      "The AI plan is paused if the initial deposit is refunded.",
-      "An inactive AI plan can be gifted.",
-    ],
-    badge: "",
-  },
-];
-
 const testimonials = [
-  {
-    id: 1,
-    name: "John Doe",
-    comment: "The Simple plan helped me earn extra income effortlessly! Highly recommended.",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    comment: "I upgraded to the Pro plan, and the rewards are amazing. Great service!",
-  },
-  {
-    id: 3,
-    name: "Alice Johnson",
-    comment: "The Premium plan is worth every penny. I’ve seen consistent earnings.",
-  },
+  { id: 1, name: "John Doe", comment: "The Simple plan helped me earn extra income effortlessly!" },
+  { id: 2, name: "Jane Smith", comment: "I upgraded to the Pro plan, and the rewards are amazing." },
+  { id: 3, name: "Alice Johnson", comment: "The Premium plan is worth every penny." },
 ];
 
 const faqs = [
-  {
-    id: 1,
-    question: "How do I activate a plan?",
-    answer: "Simply select a plan and click 'Activate Plan' in the details modal.",
-  },
-  {
-    id: 2,
-    question: "Can I switch plans?",
-    answer: "Yes, you can switch plans at any time. Your progress will be saved.",
-  },
-  {
-    id: 3,
-    question: "What happens if I refund my deposit?",
-    answer: "The AI plan will be paused until you reactivate it.",
-  },
+  { id: 1, question: "How do I activate a plan?", answer: "Select a plan and click 'Activate'." },
+  { id: 2, question: "Can I switch plans?", answer: "Yes, you can switch anytime." },
+  { id: 3, question: "What happens if I refund my deposit?", answer: "The AI plan will be paused." },
 ];
 
 const FreePlans = () => {
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activatedPlans, setActivatedPlans] = useState([]);
+  const { plans } = usePlans();
+  const token = localStorage.getItem("token");
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const [userPlans, setUserPlans] = useState([]);
   const [theme, setTheme] = useState("dark");
-  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [expandedFaqId, setExpandedFaqId] = useState(null);
-  const [userCount, setUserCount] = useState(0); // Dummy user subscription counter
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Simulate user subscription count
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+  const toggleFaq = (id) => setExpandedFaqId(expandedFaqId === id ? null : id);
+
+  // Fetch logged-in user's plans
+  const getLoggedInUserPlans = async () => {
+    try {
+      if (!token) {
+        console.log("No token available. Exiting function.");
+        return;
+      }
+
+      const response = await axiosInstance.get('auth/user/user-plans');
+
+      // Debugging: log the response data
+      console.log("Fetched plans:", response.data.plans);
+
+      const updatedPlans = response.data.plans.map(plan => {
+        const isExpired = new Date(plan.expiresAt) < new Date();
+        const isActivated = plan.paymentStatus === "completed";
+        console.log(`Plan ${plan.name} - Expired: ${isExpired}, Activated: ${isActivated}`);
+
+        return {
+          ...plan,
+          isExpired,
+          isActivated,
+        };
+      });
+
+      setUserPlans(updatedPlans);
+      console.log("Updated plans:", updatedPlans);
+    } catch (error) {
+      console.error("Error fetching user plans:", error);
+    }
+  };
+
+  const isPlanActivated = (planId) => {
+    const userPlan = userPlans.find((plan) => plan.planId === planId);
+    return userPlan && userPlan.isActivated && !userPlan.isExpired;
+  };
+
+
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setUserCount((prevCount) => prevCount + Math.floor(Math.random() * 10));
-    }, 3000); // Update every 3 seconds
-    return () => clearInterval(interval);
+    // Fetch user plans when the component mounts
+    getLoggedInUserPlans();
   }, []);
 
-  const handlePlanClick = (plan) => {
+  const confirmPurchase = async () => {
+    try {
+      setIsLoading(true); // Start loading
+
+      // Make API call to activate plan
+      const response = await axiosInstance.post('/auth/user/assign-plan', {
+        planId: selectedPlan.id
+      });
+
+      if (response.status === 200) {
+        await getLoggedInUserPlans(); // Add selected plan to userPlans
+        toast.success("Plan purchased successfully!"); // Show success toast
+        closeModal(); // Close modal after confirmation
+      }
+
+      setIsLoading(false); // End loading
+    } catch (error) {
+      console.error("Error activating plan:", error);
+      setIsLoading(false); // End loading even if there's an error
+      toast.error("An error occurred while activating the plan."); // Show error toast
+    }
+  };
+
+  const closeModal = () => setIsModalOpen(false);
+  const handleModalClick = (e) => {
+    // Prevent modal from closing if clicked inside the modal
+    e.stopPropagation();
+  };
+
+  const selectPlan = (plan) => {
+    // Disable selection for expired or already activated plans
+    if (plan.isExpired || isPlanActivated(plan.id)) {
+      return; // Don't allow selecting expired or activated plans
+    }
     setSelectedPlan(plan);
-    setIsModalOpen(true);
-  };
-
-  const handleActivatePlan = () => {
-    setActivatedPlans((prevPlans) => [...prevPlans, selectedPlan.id]);
-    setIsModalOpen(false);
-    alert(`Plan Activated: ${selectedPlan.name}`);
-  };
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
-  };
-
-  const closeOnboarding = () => {
-    setShowOnboarding(false);
-  };
-
-  const toggleFaq = (id) => {
-    setExpandedFaqId((prevId) => (prevId === id ? null : id));
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowOnboarding(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Dynamic styles based on theme
-  const containerStyles = {
-    backgroundColor: theme === "dark" ? globalStyles.root["--bg-color"] : "#f5f5f5",
-    color: theme === "dark" ? globalStyles.root["--secondary-color"] : "#333",
-    minHeight: "100vh",
-    padding: "16px",
-    maxWidth: "1200px",
-    margin: "0 auto",
-    textAlign: "center",
-  };
-
-  const headerStyles = {
-    background: globalStyles.root["--accent-gradient"],
-    padding: "20px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    boxShadow: globalStyles.root["--shadow-light"],
-    textAlign: "center",
-  };
-
-  const planCardStyles = {
-    backgroundColor: globalStyles.root["--bg-color"],
-    border: `1px solid ${globalStyles.root["--border-color"]}`,
-    borderRadius: "12px",
-    padding: "20px",
-    textAlign: "center",
-    cursor: "pointer",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease",
-    position: "relative",
-    color: globalStyles.root["--secondary-color"],
-    overflow: "hidden",
-  };
-
-  const modalStyles = {
-    backgroundColor: globalStyles.root["--bg-color"],
-    padding: "20px",
-    borderRadius: "12px",
-    width: "90%",
-    maxWidth: "400px",
-    textAlign: "left",
-    color: globalStyles.root["--secondary-color"],
+    setIsModalOpen(true); // Open modal when a plan is selected
   };
 
   return (
-    <div style={containerStyles}>
-      {/* Theme Toggle Button */}
-      <button
-        style={{
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          background: globalStyles.root["--button-bg-color"],
-          border: "none",
-          padding: "8px",
-          borderRadius: "50%",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: globalStyles.root["--secondary-color"],
-          fontSize: "16px",
-          transition: "background 0.3s ease",
-        }}
-        onClick={toggleTheme}
-      >
+    <div style={{ ...globalStyles[theme], minHeight: "100vh", padding: "16px", textAlign: "center" }}>
+      {/* Theme Toggle */}
+      <button onClick={toggleTheme} style={{ position: "fixed", top: 20, right: 20, background: globalStyles.dark.buttonBg, border: "none", padding: "8px", borderRadius: "50%", cursor: "pointer" }}>
         {theme === "dark" ? <FaSun /> : <FaMoon />}
       </button>
 
-      {/* Header Section */}
-      <div style={headerStyles}>
-        <h1 style={{ fontSize: "24px", color: globalStyles.root["--secondary-color"], marginBottom: "8px" }}>
-          Unlock Your Earnings Potential
-        </h1>
-        {/* Dummy User Subscription Counter */}
-        <div
-          style={{
-            marginTop: "10px",
-            padding: "10px",
-            background: "rgba(255, 255, 255, 0.1)",
-            borderRadius: "8px",
-            animation: "fadeIn 1s ease-in-out",
-          }}
-        >
-          <p style={{ fontSize: "14px", color: globalStyles.root["--secondary-color"] }}>
-            <strong>{userCount}+</strong> users have subscribed to our plans!
-          </p>
-        </div>
-      </div>
+      <h1>Start Your Free Earning Journey</h1>
+      <p>Choose a plan and start earning effortlessly.</p>
 
-      {/* Onboarding Tour */}
-      {showOnboarding && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            background: globalStyles.root["--bg-color"],
-            padding: "12px",
-            borderRadius: "12px",
-            boxShadow: globalStyles.root["--shadow-light"],
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <p>Welcome! Let's get started. Choose a plan to begin earning.</p>
-          <button
-            style={{
-              background: globalStyles.root["--button-bg-color"],
-              border: "none",
-              padding: "6px 12px",
-              borderRadius: "20px",
-              color: globalStyles.root["--secondary-color"],
-              cursor: "pointer",
-              transition: "background 0.3s ease",
-              fontSize: "12px",
-            }}
-            onClick={closeOnboarding}
-          >
-            Got it!
-          </button>
-        </div>
-      )}
-
-      {/* Plan Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginTop: "20px" }}>
+      {/* Plans Cards */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)", // Set to 3 columns
+          gap: "20px",
+          marginTop: "20px",
+          maxWidth: "1000px", // Limit width for better alignment
+          margin: "20px auto", // Center the grid
+        }}
+      >
         {plans.map((plan) => (
           <div
             key={plan.id}
+            onClick={() => selectPlan(plan)}
             style={{
-              ...planCardStyles,
-              transform: activatedPlans.includes(plan.id) ? "translateY(-4px)" : "none",
-              boxShadow: activatedPlans.includes(plan.id) ? globalStyles.root["--shadow-hover"] : "none",
-              border: activatedPlans.includes(plan.id) ? `1px solid ${globalStyles.root["--button-hover-bg"]}` : `1px solid ${globalStyles.root["--border-color"]}`,
+              background: "#222",
+              padding: "16px",
+              borderRadius: globalStyles.dark.borderRadius,
+              cursor: plan.isExpired || isPlanActivated(plan.id) ? "not-allowed" : "pointer", // Disable click if expired or activated
+              textAlign: "center",
+              position: "relative", // To position the activated label
+              opacity: plan.isExpired || isPlanActivated(plan.id) ? 0.6 : 1, // Make expired/activated plans less visible
             }}
-            onClick={() => handlePlanClick(plan)}
           >
-            {plan.badge && (
+            {/* Mark plan as activated if it's in userPlans and not expired */}
+            {isPlanActivated(plan.id) && (
               <span
                 style={{
                   position: "absolute",
-                  top: "8px",
-                  left: "8px",
-                  background: plan.badge === "Most Popular" ? globalStyles.root["--success-color"] : globalStyles.root["--info-color"],
-                  color: globalStyles.root["--secondary-color"],
-                  padding: "4px 8px",
-                  borderRadius: "20px",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  textTransform: "uppercase",
-                  boxShadow: globalStyles.root["--shadow-light"],
+                  top: "10px",
+                  right: "10px",
+                  background: "#28a745",
+                  color: "#fff",
+                  padding: "5px 10px",
+                  borderRadius: "5px",
+                  fontSize: "14px",
                 }}
               >
-                {plan.badge}
+                Activated
               </span>
             )}
-            <h2 style={{ fontSize: "24px", marginBottom: "8px", color: globalStyles.root["--primary-color"] }}>
-              {plan.name}
-            </h2>
+            <h2 style={{ color: globalStyles.dark.primary }}>{plan.name}</h2>
             <p>Price: ${plan.price}</p>
-            <p>Earn: ${plan.reward}</p>
-            {activatedPlans.includes(plan.id) && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "8px",
-                  right: "8px",
-                  background: globalStyles.root["--secondary-color"],
-                  color: globalStyles.root["--success-color"],
-                  padding: "4px 8px",
-                  borderRadius: "20px",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <FaCheckCircle /> Activated
-              </span>
-            )}
+            <p>Daily Earning: ${plan.dailyReward}</p>
           </div>
         ))}
       </div>
 
-      {/* Plan Comparison Table */}
-      <div style={{ margin: "20px 0" }}>
+
+
+      {/* Modal */}
+      {isModalOpen && selectedPlan && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={closeModal}
+        >
+          <div
+            style={{
+              background: theme === "dark" ? "#333" : "#fff",
+              padding: "20px",
+              borderRadius: "12px",
+              textAlign: "center",
+              width: "300px",
+              color: theme === "dark" ? "#fff" : "#333",
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ color: theme === "dark" ? "#ff6f61" : "#333" }}>Confirm Plan Purchase</h3>
+            <p>Are you sure you want to purchase the <strong>{selectedPlan?.name}</strong> plan for ${selectedPlan?.price}?</p>
+            <p><strong>Earn: ${selectedPlan?.dailyReward}</strong></p>
+
+            <div style={{ marginTop: "20px" }}>
+              <button
+                onClick={confirmPurchase}
+                style={{
+                  background: globalStyles.dark.buttonBg,
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  margin: "10px",
+                  width: "100%",
+                }}
+                disabled={isLoading} // Disable button while loading
+              >
+                {isLoading ? "Processing..." : "Yes, Purchase"}
+              </button>
+              <button
+                onClick={closeModal}
+                style={{
+                  background: "#f44336",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  margin: "10px",
+                  width: "100%",
+                }}
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+<ToastContainer />
+{/* Plan Comparison Table */}
+<div style={{ marginTop: "40px", textAlign: "center" }}>
         <h2>Plan Comparison</h2>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", background: globalStyles.root["--bg-color"], borderRadius: "12px" }}>
+        <div style={{ overflowX: "auto", display: "flex", justifyContent: "center" }}>
+          <table style={{ width: "90%", borderCollapse: "collapse", background: "#222", borderRadius: "12px", overflow: "hidden", border: "2px solid #ff6f61" }}>
             <thead>
-              <tr>
-                <th style={{ padding: "10px", textAlign: "center", background: globalStyles.root["--primary-color"], color: globalStyles.root["--secondary-color"], fontSize: "14px" }}>
-                  Plan
-                </th>
-                <th style={{ padding: "10px", textAlign: "center", background: globalStyles.root["--primary-color"], color: globalStyles.root["--secondary-color"], fontSize: "14px" }}>
-                  Price
-                </th>
-                <th style={{ padding: "10px", textAlign: "center", background: globalStyles.root["--primary-color"], color: globalStyles.root["--secondary-color"], fontSize: "14px" }}>
-                  Reward
-                </th>
-                <th style={{ padding: "10px", textAlign: "center", background: globalStyles.root["--primary-color"], color: globalStyles.root["--secondary-color"], fontSize: "14px" }}>
-                  Duration
-                </th>
-                <th style={{ padding: "10px", textAlign: "center", background: globalStyles.root["--primary-color"], color: globalStyles.root["--secondary-color"], fontSize: "14px" }}>
-                  Daily Earnings
-                </th>
+              <tr style={{ background: globalStyles.dark.primary, color: "white", fontSize: "18px" }}>
+                <th style={{ padding: "12px", border: "2px solid #ff6f61" }}>Plan</th>
+                <th style={{ padding: "12px", border: "2px solid #ff6f61" }}>Price</th>
+              
+                <th style={{ padding: "12px", border: "2px solid #ff6f61" }}>Duration</th>
+                <th style={{ padding: "12px", border: "2px solid #ff6f61" }}>Daily Earnings</th>
               </tr>
             </thead>
             <tbody>
               {plans.map((plan) => (
-                <tr key={plan.id} style={{ borderBottom: `1px solid ${globalStyles.root["--border-color"]}` }}>
-                  <td style={{ padding: "10px", textAlign: "center" }}>{plan.name}</td>
-                  <td style={{ padding: "10px", textAlign: "center" }}>${plan.price}</td>
-                  <td style={{ padding: "10px", textAlign: "center" }}>${plan.reward}</td>
-                  <td style={{ padding: "10px", textAlign: "center" }}>{plan.duration}</td>
-                  <td style={{ padding: "10px", textAlign: "center" }}>${plan.dailyEarnings}</td>
+                <tr key={plan.id} style={{ borderBottom: "2px solid #ff6f61", fontSize: "16px" }}>
+                  <td style={{ padding: "12px", border: "2px solid #ff6f61" }}>{plan.name}</td>
+                  <td style={{ padding: "12px", border: "2px solid #ff6f61" }}>${plan.price}</td>
+    
+                  <td style={{ padding: "12px", border: "2px solid #ff6f61" }}>{plan.duration}</td>
+                  <td style={{ padding: "12px", border: "2px solid #ff6f61" }}>${plan.dailyReward}</td>
                 </tr>
               ))}
             </tbody>
@@ -403,181 +290,32 @@ const FreePlans = () => {
         </div>
       </div>
 
+
       {/* Testimonials Section */}
-      <div style={{ margin: "20px 0" }}>
+      <div style={{ marginTop: "50px" }}>
         <h2>What Our Users Say</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
-          {testimonials.map((testimonial) => (
-            <div
-              key={testimonial.id}
-              style={{
-                background: globalStyles.root["--bg-color"],
-                padding: "20px",
-                borderRadius: "12px",
-                textAlign: "left",
-              }}
-            >
-              <FaQuoteLeft style={{ fontSize: "18px", color: globalStyles.root["--primary-color"], marginBottom: "6px" }} />
-              <p>{testimonial.comment}</p>
-              <h3 style={{ fontSize: "16px", color: globalStyles.root["--primary-color"], marginTop: "6px" }}>
-                - {testimonial.name}
-              </h3>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* FAQ Section */}
-      <div style={{ margin: "20px 0" }}>
-        <h2>Frequently Asked Questions</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
-          {faqs.map((faq) => (
-            <div
-              key={faq.id}
-              style={{
-                background: globalStyles.root["--bg-color"],
-                padding: "20px",
-                borderRadius: "12px",
-                textAlign: "left",
-                cursor: "pointer",
-              }}
-              onClick={() => toggleFaq(faq.id)}
-            >
-              <FaQuestionCircle style={{ fontSize: "18px", color: globalStyles.root["--primary-color"], marginBottom: "6px" }} />
-              <h3 style={{ fontSize: "16px", color: globalStyles.root["--primary-color"], marginBottom: "6px" }}>
-                {faq.question}
-              </h3>
-              {expandedFaqId === faq.id && (
-                <p style={{ fontSize: "14px", color: "#ccc", marginTop: "6px" }}>{faq.answer}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Social Media Sharing */}
-      <div style={{ margin: "20px 0" }}>
-        <h2>Share Your Achievements</h2>
-        <button
-          style={{
-            background: globalStyles.root["--primary-color"],
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: "30px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            color: globalStyles.root["--secondary-color"],
-            transition: "background 0.3s ease",
-          }}
-        >
-          <FaShareAlt /> Share on Social Media
-        </button>
-      </div>
-
-      {/* Modal for Plan Details */}
-      {isModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0, 0, 0, 0.7)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div style={modalStyles}>
-            <h2 style={{ fontSize: "20px", marginBottom: "12px", color: globalStyles.root["--primary-color"], display: "flex", alignItems: "center", gap: "8px" }}>
-              <FaInfoCircle /> {selectedPlan.name} Plan Details
-            </h2>
-            <div>
-              <p>
-                <strong>Price:</strong> ${selectedPlan.price}
-              </p>
-              <p>
-                <strong>Duration:</strong> {selectedPlan.duration}
-              </p>
-              <p>
-                <strong>Expected Daily Earnings:</strong> ${selectedPlan.dailyEarnings}
-              </p>
-              <div
-                style={{
-                  background: "#444",
-                  borderRadius: "10px",
-                  height: "8px",
-                  margin: "12px 0",
-                }}
-              >
-                <div
-                  style={{
-                    background: globalStyles.root["--primary-color"],
-                    height: "100%",
-                    borderRadius: "10px",
-                    width: "50%",
-                    animation: "progress-animation 2s ease-in-out infinite",
-                  }}
-                ></div>
-              </div>
-              <div style={{ marginTop: "16px" }}>
-                <h3 style={{ fontSize: "16px", marginBottom: "8px", color: globalStyles.root["--primary-color"] }}>
-                  Useful Tips:
-                </h3>
-                <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
-                  {selectedPlan.usefulTips.map((tip, index) => (
-                    <li key={index} style={{ fontSize: "14px", marginBottom: "4px", color: "#ccc" }}>
-                      {tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "16px" }}>
-              <button
-                style={{
-                  padding: "8px 16px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  background: globalStyles.root["--error-color"],
-                  color: globalStyles.root["--secondary-color"],
-                  transition: "background 0.3s ease",
-                }}
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                style={{
-                  padding: "8px 16px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  background: globalStyles.root["--success-color"],
-                  color: globalStyles.root["--secondary-color"],
-                  transition: "background 0.3s ease",
-                }}
-                onClick={handleActivatePlan}
-              >
-                Activate Plan
-              </button>
-            </div>
+        {testimonials.map((testimonial) => (
+          <div key={testimonial.id}>
+            <p><FaQuoteLeft /> "{testimonial.comment}"</p>
+            <p><strong>- {testimonial.name}</strong></p>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+
+      {/* FAQs Section */}
+      <div style={{ marginTop: "50px" }}>
+        <h2>Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div key={faq.id}>
+            <h3 onClick={() => toggleFaq(faq.id)} style={{ cursor: "pointer", color: globalStyles.dark.primary }}>
+              <FaQuestionCircle /> {faq.question}
+            </h3>
+            {expandedFaqId === faq.id && <p>{faq.answer}</p>}
+          </div>
+        ))}
+      </div>
     </div>
   );
-};
+}
 
 export default FreePlans;

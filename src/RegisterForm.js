@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "./contextApi/AuthContext";
 
 const RegisterForm = () => {
+  const { signup } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -9,12 +11,23 @@ const RegisterForm = () => {
   const [loginPassword, setLoginPassword] = useState("");
   const [confirmLoginPassword, setConfirmLoginPassword] = useState("");
   const [withdrawalPassword, setWithdrawalPassword] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  const [inviteCode, setInviteCode] = useState(""); // State for invitation code
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation(); // Get current URL location
 
-  const handleSubmit = (e) => {
+  // Extract invitationCode from query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const invitationCode = params.get('invitationCode'); // Get invitationCode from URL
+    if (invitationCode) {
+      setInviteCode(invitationCode); // Set inviteCode state if exists in URL
+    }
+  }, [location.search]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     if (
       !firstName ||
       !lastName ||
@@ -28,20 +41,22 @@ const RegisterForm = () => {
       return;
     }
     if (loginPassword !== confirmLoginPassword) {
-      setError("App Login Passwords do not match.");
+      setError("Passwords do not match.");
       return;
     }
+  
     setError("");
-    console.log("Registering:", {
-      firstName,
-      lastName,
-      email,
-      phone,
-      loginPassword,
-      withdrawalPassword,
-      inviteCode,
-    });
-    // Registration logic goes here...
+    try {
+      const response = await signup(firstName, lastName, email, phone, loginPassword, withdrawalPassword, inviteCode);
+      if (response.status === 201) {
+        navigate("/login");
+      }else{
+        setError(response.data.message);
+      }
+    } catch (errors) {
+      const errorMessages = errors.map((error) => `${error.message}`).join(", ");
+      setError(errorMessages);
+    }
   };
 
   const styles = {
@@ -129,7 +144,6 @@ const RegisterForm = () => {
             background: #ff847a;
             transform: scale(1.02);
           }
-          /* Two-column grid for rows, one column on mobile */
           .grid-row-2 {
             display: grid;
             grid-template-columns: 1fr;
@@ -145,7 +159,6 @@ const RegisterForm = () => {
       <h1 style={styles.title}>Register</h1>
       {error && <div style={styles.error}>{error}</div>}
       <form onSubmit={handleSubmit} style={styles.form}>
-        {/* Row 1: First Name and Last Name */}
         <div className="grid-row-2">
           <div>
             <label style={labelStyles}>First Name</label>
@@ -168,7 +181,6 @@ const RegisterForm = () => {
             />
           </div>
         </div>
-        {/* Row 2: Email and Phone Number */}
         <div className="grid-row-2">
           <div>
             <label style={labelStyles}>Email</label>
@@ -191,7 +203,6 @@ const RegisterForm = () => {
             />
           </div>
         </div>
-        {/* Row 3: App Login Password and Confirm Password */}
         <div className="grid-row-2">
           <div>
             <label style={labelStyles}>Password</label>
@@ -214,7 +225,6 @@ const RegisterForm = () => {
             />
           </div>
         </div>
-        {/* Row 4: Withdrawal Password and Invitation Code */}
         <div className="grid-row-2">
           <div>
             <label style={labelStyles}>Withdrawal Password</label>
@@ -237,7 +247,6 @@ const RegisterForm = () => {
             />
           </div>
         </div>
-        {/* Row 5: Register Button */}
         <button type="submit" style={styles.button}>
           Register
         </button>

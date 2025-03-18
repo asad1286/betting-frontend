@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import PropTypes from "prop-types";
+import axios from "axios";
 import {
   FaUserCircle,
   FaSave,
@@ -10,7 +11,11 @@ import {
   FaEdit,
   FaMoon,
   FaSun,
+  FaCog,
+  FaCogs
 } from "react-icons/fa";
+import { useAuth } from "./contextApi/AuthContext";
+import axiosInstance from "./AxiosInstance";
 
 // Reusable Input Field Component with inline edit button
 const InputField = ({
@@ -70,7 +75,7 @@ InputField.defaultProps = {
 // Reusable Section Title Component
 const SectionTitle = ({ title, icon: Icon }) => (
   <div className="section-title">
-    {Icon && <Icon style={{ marginRight: "8px" }} aria-hidden="true" />}
+    {Icon && <Icon style={{ marginRight: "8px" ,}} aria-hidden="true" />}
     {title}
   </div>
 );
@@ -85,108 +90,111 @@ SectionTitle.defaultProps = {
 };
 
 const UserProfile = () => {
-  // User data state
-  const [user, setUser] = useState({
-    uid: "USER123456",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1234567890",
-    profilePicture: "",
-  });
-
-  // Editable personal information fields
+  const { user,token,updateUser } = useAuth(); // Get updateUser from auth context
   const [editedFields, setEditedFields] = useState({
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    phoneNumber: user?.phoneNumber || "",
   });
-
   const [editableFields, setEditableFields] = useState({
-    name: false,
-    email: false,
-    phone: false,
+    firstName: false,
+    lastName: false,
+    phoneNumber: false,
   });
-
-  // Security fields state
+  
+  const toggleEditable = (field) => {
+    setEditableFields(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  
   const [security, setSecurity] = useState({
+    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-    withdrawalPassword: "",
   });
-
-  // Profile picture preview state
-  const [previewImage, setPreviewImage] = useState("");
-
-  // Feedback messages
+  const [previewImage, setPreviewImage] = useState(user?.profilePicture || "");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  // Theme toggle state
+  const [showSecurityForm, setShowSecurityForm] = useState(false);
+  const [errorUpdate, setErrorUpdate] = useState("");
+  const [errorPassword, setErrorPassword] = useState("");
+  const [messagePassword, setMessagePassword] = useState("");
+  const [messageUpdate, setUpdateMessage] = useState("");
   const [darkMode, setDarkMode] = useState(true);
-  const toggleTheme = () => setDarkMode((prev) => !prev);
+  const toggleSecurityForm = () => {
+    setShowSecurityForm(!showSecurityForm);
+    // Reset security fields when hiding
+    if (showSecurityForm) {
+      setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    }
+  };
+  const handleSavePersonalInfo = async () => {
+    try {
+      const response = await axiosInstance.put("/auth/user/update_profile",editedFields);
 
-  // Handle saving personal info changes
-  const handleSavePersonalInfo = () => {
-    setError("");
-    setMessage("");
-    setUser((prevUser) => ({
-      ...prevUser,
-      name: editedFields.name,
-      email: editedFields.email,
-      phone: editedFields.phone,
-      profilePicture: previewImage || prevUser.profilePicture,
-    }));
-    setMessage("Personal information updated successfully!");
-    // Lock fields after saving
-    setEditableFields({ name: false, email: false, phone: false });
+      updateUser(response.data.user);
+      setEditableFields({ firstName: false, lastName: false, phoneNumber: false });
+      setUpdateMessage("Profile updated successfully!");
+      setTimeout(() => setUpdateMessage(null), 3000);
+      
+    } catch (err) {
+      setErrorUpdate(err.response?.data?.message || "Failed to update profile");
+      setTimeout(() => setErrorUpdate(null), 3000);
+    }
   };
 
-  // Handle security update submission
-  const handleSecurityUpdate = (e) => {
+
+  const handleSecurityUpdate = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-    if (security.newPassword && security.newPassword !== security.confirmPassword) {
-      setError("New login passwords do not match.");
+    if (security.newPassword !== security.confirmPassword) {
+      setErrorPassword("Passwords do not match");
+      setTimeout(() => setErrorPassword(null), 3000);
       return;
     }
-    setMessage("Security settings updated successfully!");
-    // Reset security fields
-    setSecurity({
-      newPassword: "",
-      confirmPassword: "",
-      withdrawalPassword: "",
-    });
-  };
 
-  // Handle profile picture upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewImage(reader.result);
-      reader.readAsDataURL(file);
+    try {
+      await axiosInstance.put(
+        "/auth/user/update_password",
+        {
+          currentPassword: security.currentPassword,
+          newPassword: security.newPassword,
+        }
+      );
+      
+      setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setMessagePassword("Password updated successfully!");
+      setTimeout(() => setMessagePassword(null), 3000);
+      
+    } catch (err) {
+      setErrorPassword(err.response?.data?.message || "Password update failed");
+      setTimeout(() => setErrorPassword(null), 3000);
     }
   };
 
-  // Update handlers for personal info fields
-  const handleFieldChange = (field) => (e) => {
-    setEditedFields({ ...editedFields, [field]: e.target.value });
-  };
+  // const handleFileChange = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
 
-  // Toggle edit mode for a field
-  const toggleEditField = (field) => {
-    setEditableFields({ ...editableFields, [field]: true });
-  };
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("profile", file);
+      
+  //     const response = await axios.post("/api/user/avatar", formData, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //         Authorization: `Bearer ${user.token}`,
+  //       },
+  //     });
 
-  // Update handlers for security fields
-  const handleSecurityFieldChange = (field) => (e) => {
-    setSecurity({ ...security, [field]: e.target.value });
-  };
+  //     setPreviewImage(response.data.avatarUrl);
+  //     updateUser({ ...user, profilePicture: response.data.avatarUrl });
+  //   } catch (err) {
+  //     setError("Failed to update profile picture");
+  //   }
+  // };
+
+  // Keep all styling code as is
 
   return (
     <div className="profile-container">
-      {/* Inline CSS styling */}
       <style>{`
         .profile-container {
           max-width: 600px;
@@ -364,91 +372,103 @@ const UserProfile = () => {
         }
       `}</style>
 
+
       <div className="profile-header">
         <label className="profile-picture">
-          {previewImage || user.profilePicture ? (
-            <img src={previewImage || user.profilePicture} alt="Profile" />
+          {previewImage ? (
+            <img src={previewImage} alt="Profile" />
           ) : (
             <FaUserCircle className="default-avatar" />
           )}
-          <div className="edit-avatar-icon">
-            <FaEdit />
-          </div>
-          <input type="file" accept="image/*" onChange={handleFileChange} />
+          <input type="file"/>
         </label>
-        <h2>{user.name}</h2>
-        <p>UID: {user.uid}</p>
+        <h2>{user?.firstName} {user?.lastName}</h2>
+        <p>UID: {user?.uid}</p>
       </div>
-
-      {error && <div className="error-message">{error}</div>}
-      {message && <div className="success-message">{message}</div>}
 
       {/* Personal Information Section */}
       <div className="profile-form">
+      {errorUpdate && <div className="error-message">{errorUpdate}</div>}
+      {messageUpdate && <div className="success-message">{messageUpdate}</div>}
         <SectionTitle title="Personal Information" icon={FaUser} />
         <InputField
-          label="Name"
-          type="text"
-          value={editedFields.name}
-          onChange={handleFieldChange("name")}
-          icon={FaUser}
-          editable={editableFields.name}
-          onEditClick={() => toggleEditField("name")}
+       label="First Name"
+       value={editedFields.firstName}
+       onChange={(e) => setEditedFields({...editedFields, firstName: e.target.value})}
+       icon={FaUser}
+       editable={editableFields.firstName}
+       onEditClick={() => toggleEditable('firstName')}
+        />
+         <InputField
+           label="Last Name"
+           value={editedFields.lastName}
+           onChange={(e) => setEditedFields({...editedFields, lastName: e.target.value})}
+           icon={FaUser}
+           editable={editableFields.lastName}
+           onEditClick={() => toggleEditable('lastName')}
         />
         <InputField
           label="Email"
-          type="email"
-          value={editedFields.email}
-          onChange={handleFieldChange("email")}
+          value={user?.email}
           icon={FaEnvelope}
-          editable={editableFields.email}
-          onEditClick={() => toggleEditField("email")}
+          editable={false}
         />
         <InputField
-          label="Phone"
-          type="tel"
-          value={editedFields.phone}
-          onChange={handleFieldChange("phone")}
+          label="Phone Number"
+          value={editedFields.phoneNumber}
+          onChange={(e) => setEditedFields({...editedFields, phoneNumber: e.target.value})}
           icon={FaPhone}
-          editable={editableFields.phone}
-          onEditClick={() => toggleEditField("phone")}
+          editable={editableFields.phoneNumber}
+          onEditClick={() => toggleEditable('phoneNumber')}
         />
-        <button type="button" className="save-btn" onClick={handleSavePersonalInfo}>
-          <FaSave /> Save Personal Info
+        <button className="save-btn" onClick={handleSavePersonalInfo}>
+          <FaSave /> Save
         </button>
       </div>
 
+      <button 
+        className="toggle-security-btn save-btn"
+        onClick={toggleSecurityForm}
+        style={{ marginTop: '20px' }}
+      >
+        <FaCogs /> {showSecurityForm ? "Hide Security Settings" : "Show Security Settings"}
+      </button>
+
       {/* Security Settings Section */}
-      <form className="profile-form" onSubmit={handleSecurityUpdate}>
-        <SectionTitle title="Security Settings" icon={FaLock} />
-        <InputField
-          label="New Login Password"
-          type="password"
-          value={security.newPassword}
-          onChange={handleSecurityFieldChange("newPassword")}
-          placeholder="Enter new login password"
-        />
-        <InputField
-          label="Confirm Login Password"
-          type="password"
-          value={security.confirmPassword}
-          onChange={handleSecurityFieldChange("confirmPassword")}
-          placeholder="Confirm new password"
-        />
-        <InputField
-          label="New Withdrawal Password"
-          type="password"
-          value={security.withdrawalPassword}
-          onChange={handleSecurityFieldChange("withdrawalPassword")}
-          placeholder="Enter new withdrawal password"
-        />
-        <button type="submit" className="save-btn">
-          <FaSave /> Save Security Settings
-        </button>
-      </form>
+      {showSecurityForm && (
+        <form className="profile-form" onSubmit={handleSecurityUpdate}>
+          <SectionTitle title="Security Settings" icon={FaLock} />
+          {errorPassword && <div className="error-message">{errorPassword}</div>}
+          {messagePassword && <div className="success-message">{messagePassword}</div>}
+          <InputField
+            label="Current Password"
+            type="password"
+            value={security.currentPassword}
+            onChange={(e) => setSecurity({...security, currentPassword: e.target.value})}
+            editable={true}
+          />
+          <InputField
+            label="New Password"
+            type="password"
+            value={security.newPassword}
+            onChange={(e) => setSecurity({...security, newPassword: e.target.value})}
+            editable={true}
+          />
+          <InputField
+            label="Confirm Password"
+            type="password"
+            value={security.confirmPassword}
+            onChange={(e) => setSecurity({...security, confirmPassword: e.target.value})}
+            editable={true}
+          />
+          <button type="submit" className="save-btn">
+            <FaSave /> Update Password
+          </button>
+        </form>
+      )}
 
       {/* Theme Toggle */}
-      <button type="button" className="toggle-theme-btn" onClick={toggleTheme}>
+      <button className="toggle-theme-btn" onClick={() => setDarkMode(!darkMode)}>
         {darkMode ? <FaMoon /> : <FaSun />} {darkMode ? "Dark" : "Light"} Mode
       </button>
     </div>

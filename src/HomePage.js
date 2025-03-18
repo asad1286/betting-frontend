@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "./contextApi/AuthContext";
 import {
   FaEye,
   FaEyeSlash,
@@ -18,7 +19,7 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const [usdtBalance, setUsdtBalance] = useState(1000.0);
+  const {user} = useAuth()
   const [announcements, setAnnouncements] = useState([
     "Welcome to QuickCash! Enjoy our exclusive rewards.",
     "Check out our Free Plans to earn daily bonuses.",
@@ -178,7 +179,7 @@ function HomePage() {
       gap: "2px",
     },
     balanceValue: {
-      fontSize: "14px",
+      fontSize: "20px",
       fontWeight: "bold",
       color: "#ff6f61",
     },
@@ -187,7 +188,8 @@ function HomePage() {
       border: "none",
       color: "#ff6f61",
       cursor: "pointer",
-      fontSize: "12px",
+      marginLeft:"6px",
+      fontSize: "18px",
       display: "flex",
       alignItems: "center",
     },
@@ -464,9 +466,9 @@ function HomePage() {
                 <span style={styles.balanceIcon}>💰</span>
                 <p style={styles.balanceLabel}>USDT</p>
                 <div style={styles.balanceValueContainer}>
-                  <p style={styles.balanceValue}>
-                    {isBalanceVisible ? usdtBalance.toFixed(2) : "****"}
-                  </p>
+                  <h3 style={styles.balanceValue}>
+                    {isBalanceVisible ? user.userUsdtBalance+"$" : "****"}
+                  </h3>
                   <button
                     style={styles.eyeButton}
                     onClick={() => setIsBalanceVisible(!isBalanceVisible)}

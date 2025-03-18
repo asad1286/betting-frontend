@@ -5,23 +5,38 @@ import {
   MdCardGiftcard,
   MdList,
   MdPeople,
+  MdAccountBalanceWallet,
   MdAnnouncement,
   MdExitToApp,
   MdEdit,
+  MdContentCopy,
 } from "react-icons/md";
+import { useAuth } from "./contextApi/AuthContext";
+import { FaCoins } from "react-icons/fa";
 
 function SettingsPage() {
   const navigate = useNavigate();
+  const {user,logout}=useAuth();
 
   // Handle logout: Navigate to login form
-  const handleLogout = () => {
-    alert("Logged out successfully!");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout(); // Make sure logout is an async function if it performs async actions
+      navigate("/login"); // Navigate after logout to avoid potential state update during render
+    } catch (error) {
+      console.error("Logout Error:", error); // Log any errors
+    }
   };
+  
 
   // Navigate to profile page when profile section is clicked
   const handleProfileClick = () => {
     navigate("/profile");
+  };
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    alert("Address copied to clipboard!");
   };
 
   // Inline styles derived from your CSS
@@ -120,10 +135,11 @@ function SettingsPage() {
       <div style={styles.profileSection} onClick={handleProfileClick}>
         <div style={styles.profileHeader}>
           <MdAccountCircle style={styles.profileIcon} />
-          <h2 style={styles.profileName}>John Doe</h2>
-          <p style={styles.profileDetail}>hksharma@gmail.com</p>
-          <p style={styles.profileDetail}>UID: 10082321</p>
-          <p style={styles.profileDetail}>VIP 1</p>
+          <h2 style={styles.profileName}>{user?.firstName} {user?.lastName}</h2>
+          <p style={styles.profileDetail}>UID: {user?.uid}</p>
+          
+          
+          {/* <p style={styles.profileDetail}>{user.phoneNumber}</p> */}
           <button
             style={styles.editProfileBtn}
             onClick={(e) => {
@@ -140,6 +156,12 @@ function SettingsPage() {
       {/* Vertical Menu Options */}
       <div>
         <ul style={styles.menuList}>
+        <li style={styles.menuItem}>
+          <button style={{ ...styles.menuButton, justifyContent: "space-between", width: "100%" }}>
+            <span><FaCoins/>   {user?.trx20DepositAddress}</span>
+            <MdContentCopy style={{ cursor: "pointer" }} onClick={() => handleCopy(user?.trx20DepositAddress)} />
+          </button>
+        </li>
           <li style={styles.menuItem}>
             <button
               style={styles.menuButton}
