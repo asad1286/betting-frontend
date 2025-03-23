@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+
 import axiosInstance from '../AxiosInstance';
 
 const AuthContext = createContext();
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const isAuthenticated = !!token;
+  const isUserAutenticated = !!token;
 
   return (
     <AuthContext.Provider value={{ 
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
       login, 
       signup, 
       logout, 
-      isAuthenticated,
+      isUserAutenticated,
       updateUser,
   
     }}>

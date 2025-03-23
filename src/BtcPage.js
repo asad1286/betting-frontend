@@ -12,7 +12,7 @@ import {
 } from "chart.js";
 import { FaCoins, FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { Table, Button, message, Input, Space } from "antd";
+import { Table, Button, message } from "antd";
 import "./BtcPage.css";
 
 ChartJS.register(
@@ -81,6 +81,7 @@ function BtcPage() {
     }, 1000);
 
     return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft]);
 
   // Process the current round when timer hits 0.

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { FaUser, FaCopy, FaShareAlt, FaInfoCircle } from "react-icons/fa";
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { usePlans } from "./contextApi/PlanContext";
 import { FaCheckCircle, FaSun, FaMoon, FaQuoteLeft, FaQuestionCircle, FaTimes } from "react-icons/fa";
@@ -89,6 +90,7 @@ const FreePlans = () => {
   useEffect(() => {
     // Fetch user plans when the component mounts
     getLoggedInUserPlans();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const confirmPurchase = async () => {

@@ -5,7 +5,6 @@ import {
   MdCardGiftcard,
   MdList,
   MdPeople,
-  MdAccountBalanceWallet,
   MdAnnouncement,
   MdExitToApp,
   MdEdit,
