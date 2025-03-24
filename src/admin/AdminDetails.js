@@ -30,7 +30,7 @@ const AdminDetails = () => {
       {/* Top Stats Row */}
       <div className="stats-row" style={styles.statsRow}>
         <div className="stat-item" style={styles.statItem}>
-          <h2 style={styles.statTitle}>Total USDT</h2>
+          <h2 style={styles.statTitle}>Total</h2>
           <p style={styles.statValue}>{usdtBalance}</p>
         </div>
         <div className="stat-item" style={styles.statItem}>

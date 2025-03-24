@@ -30,6 +30,7 @@ function App() {
             {/* USER ROUTES */}
             <Route path="/" element={isUserAutenticated ? <HomePage /> : <Navigate to="/login" />} />
             <Route path="/login" element={isUserAutenticated ? <Navigate to="/" /> : <LoginForm />} />
+            <Route path="/signup" element={isUserAutenticated ? <Navigate to="/" /> : <RegisterForm />} />
             <Route path="/profile" element={isUserAutenticated ? <UserProfile /> : <Navigate to="/login" />} />
 
             {/* ADMIN ROUTES */}

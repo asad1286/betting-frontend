@@ -155,7 +155,7 @@ function HomePage() {
       gap: "4px",
     },
     balanceTitle: {
-      fontSize: "12px",
+      fontSize: "16px",
       fontWeight: 600,
       color: "#ff6f61",
       marginBottom: "2px",
@@ -465,7 +465,7 @@ function HomePage() {
               <p style={styles.balanceTitle}>Your Balance</p>
               <div style={styles.balanceItem}>
                 <span style={styles.balanceIcon}>💰</span>
-                <p style={styles.balanceLabel}>USDT</p>
+                <p style={styles.balanceLabel}>TRX</p>
                 <div style={styles.balanceValueContainer}>
                   <h3 style={styles.balanceValue}>
                     {isBalanceVisible ? user.userUsdtBalance+"$" : "****"}
@@ -478,20 +478,7 @@ function HomePage() {
                   </button>
                 </div>
               </div>
-              <div style={styles.balanceActions}>
-                <button
-                  style={{ ...styles.actionButton, ...styles.withdrawButton }}
-                  onClick={() => navigate("/withdraw")}
-                >
-                  Withdraw
-                </button>
-                <button
-                  style={{ ...styles.actionButton, ...styles.depositButton }}
-                  onClick={() => navigate("/deposit")}
-                >
-                  Deposit
-                </button>
-              </div>
+             
             </div>
           </div>
         </div>

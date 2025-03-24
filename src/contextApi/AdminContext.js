@@ -91,6 +91,7 @@ export const AdminProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await axiosInstance.get('/admin/withdraw-requests');
+      console.log(response.data)
       if (response.data.success) {
         setWithdrawRequests(response.data.withdrawRequests);
       } else {

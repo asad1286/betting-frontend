@@ -1,15 +1,13 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { FaUser, FaCopy, FaShareAlt, FaInfoCircle } from "react-icons/fa";
+import { useAuth } from "./contextApi/AuthContext";
 
 function InvitePage() {
-  const [inviteCode] = useState("INVITE123"); // Example invite code
-  const [joinedUsers, setJoinedUsers] = useState([
-    { id: 1, name: "User A", joinedAt: "2025-02-10" },
-    { id: 2, name: "User B", joinedAt: "2025-02-12" },
-  ]);
+  const {user}=useAuth() // Example invite code
+ 
 
-  const inviteLink = `https://yourwebsite.com/signup?ref=${inviteCode}`;
+  const inviteLink = `http://localhost:3002/signup?invitationCode=${user.invitationCode}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(inviteLink);
@@ -21,7 +19,7 @@ function InvitePage() {
       navigator
         .share({
           title: "Join Our Platform!",
-          text: `Use my invite code to join: ${inviteCode}`,
+          text: `Use my invite code to join: ${user.invitationCode}`,
           url: inviteLink,
         })
         .catch((error) => console.error("Error sharing:", error));
@@ -169,13 +167,13 @@ function InvitePage() {
       <div style={styles.profileSection}>
         <FaUser style={styles.profileIcon} />
         <p>
-          Username: <strong>Your Name</strong>
+          Username: <strong>{user.firstName} {user.lastName}</strong>
         </p>
       </div>
 
       <div style={styles.inviteCodeSection}>
         <p style={styles.inviteCodeText}>
-          Your Invite Code: <strong>{inviteCode}</strong>
+          Your Invite Code: <strong>{user.invitationCode}</strong>
         </p>
         <button style={styles.copyButton} onClick={copyToClipboard}>
           <FaCopy /> Copy Code
@@ -198,7 +196,7 @@ function InvitePage() {
         </button>
       </div>
 
-      <h2 style={styles.joinedUsersHeading}>Users Who Joined With Your Link</h2>
+      {/* <h2 style={styles.joinedUsersHeading}>Users Who Joined With Your Link</h2>
       <div style={styles.joinedUsersSection}>
         {joinedUsers.length > 0 ? (
           <ul style={styles.userList}>
@@ -218,7 +216,7 @@ function InvitePage() {
         ) : (
           <p>No users have joined yet.</p>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

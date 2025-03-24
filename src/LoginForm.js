@@ -167,9 +167,9 @@ const LoginForm = () => {
           }
         `}
       </style>
-      <div style={styles.bonusBanner}>
+      {/* <div style={styles.bonusBanner}>
         🎉 New Users: Deposit & Get a 10% Bonus! 🎉
-      </div>
+      </div> */}
       <h1 style={styles.title}>Login</h1>
       {error && <div style={styles.error}>{error}</div>}
       <form onSubmit={handleSubmit} style={styles.form}>
@@ -217,7 +217,7 @@ const LoginForm = () => {
       {/* Register Link */}
       <div style={styles.switchContainer}>
         <span style={{ color: "#ccc" }}>Don't have an account? </span>
-        <button style={styles.switchLink} onClick={() => navigate("/register")}>
+        <button style={styles.switchLink} onClick={() => navigate("/signup")}>
           Register
         </button>
       </div>
