@@ -1,17 +1,19 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 import axiosInstance from '../AxiosInstance';
-
+import Cookies from 'js-cookie';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
- 
+  const [timer, setTimer] = useState({});
+  const [loading, setLoading] = useState(false);
+   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const storedToken = Cookies.get('token',{ expires: 5 / 24 });
+    const storedUser = Cookies.get('user',{ expires: 5 / 24 });
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -26,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedData) => {
     const updatedUser = { ...user, ...updatedData };
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    Cookies.set('user', JSON.stringify(updateUser),{ expires: 5 / 24 });
   };
 
   // Login function
@@ -46,8 +48,8 @@ export const AuthProvider = ({ children }) => {
 
       setToken(token);
       setUser(user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      Cookies.set('token', token,{ expires: 5 / 24 });
+      Cookies.set('user', JSON.stringify(response.data.user),{ expires: 5 / 24 });
       console.log("token in context",token)
       
 
@@ -87,10 +89,30 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    Cookies.remove('token');
+    Cookies.remove('user');
   };
 
+  const fetchSectionTimer = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get('/admin/latest-timer');
+      console.log(response.data)
+      if (response.data.success) {
+        setTimer(response.data.timer);
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+useEffect(() => {
+    
+    fetchSectionTimer();
+  }, []);
   const isUserAutenticated = !!token;
 
   return (
@@ -99,6 +121,7 @@ export const AuthProvider = ({ children }) => {
       token, 
       login, 
       signup, 
+      timer,
       logout, 
       isUserAutenticated,
       updateUser,

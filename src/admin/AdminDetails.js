@@ -4,7 +4,7 @@ import { useAdmin } from '../contextApi/AdminContext';
 
 const AdminDetails = () => {
   const { adminDetails, loading, error, fetchAdminDetails } = useAdmin();
-  console.log("adminDetails", adminDetails);
+  // console.log("adminDetails", adminDetails);
 
   // UseEffect to fetch data if not already available
   useEffect(() => {

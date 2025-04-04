@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 
 const WithDrawalRequests = () => {
     const { withdrawRequests, fetchWithdrawRequests } = useAdmin();
+    console.log("withdrawRequests", withdrawRequests);
     const [selectedStatus, setSelectedStatus] = useState({}); // State to handle status change
     const [isModalOpen, setIsModalOpen] = useState(false); // State to handle modal visibility
     const [rejectionReason, setRejectionReason] = useState(""); // State to handle rejection reason

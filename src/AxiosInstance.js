@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import Cookies from 'js-cookie';
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL,
   headers: {
@@ -10,7 +11,7 @@ const axiosInstance = axios.create({
 // Interceptor to dynamically add the latest token before each request
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // Get the latest token
+    const token = Cookies.get("token"); // Get the latest token
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }

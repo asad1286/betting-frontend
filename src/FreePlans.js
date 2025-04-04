@@ -4,6 +4,7 @@ import { usePlans } from "./contextApi/PlanContext";
 import { FaCheckCircle, FaSun, FaMoon, FaQuoteLeft, FaQuestionCircle, FaTimes } from "react-icons/fa";
 import axios from "axios";
 import axiosInstance from "./AxiosInstance";
+import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -37,7 +38,7 @@ const faqs = [
 
 const FreePlans = () => {
   const { plans } = usePlans();
-  const token = localStorage.getItem("token");
+  const token = Cookies.get("token");
   const [isLoading, setIsLoading] = useState(false); // Added loading state
   const [userPlans, setUserPlans] = useState([]);
   const [theme, setTheme] = useState("dark");
