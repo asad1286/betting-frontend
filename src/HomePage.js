@@ -17,9 +17,10 @@ import { useAdmin } from "./contextApi/AdminContext";
 
 function HomePage() {
   const navigate = useNavigate();
+
   const [marketData, setMarketData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { timer } = useAuth();
+  const { timer,balance } = useAuth();
   const { endTime } = timer || {};
   
   const [remainingTime, setRemainingTime] = useState("");  // Updated to store formatted time as a string
@@ -522,11 +523,11 @@ function HomePage() {
     <div
       style={styles.quickOption}
       onClick={() => {
-        if (endTime) {
+        // if (endTime) {
           // If endTime exists and it's in the future, navigate to the BTC page
           setShowTimerModal(true);
           // navigate("/btc-page");
-        }
+        // }
       }}
     >
       <FaBitcoin style={styles.quickIcon} />
@@ -617,7 +618,7 @@ function HomePage() {
                 <p style={styles.balanceLabel}>TRX</p>
                 <div style={styles.balanceValueContainer}>
                   <h3 style={styles.balanceValue}>
-                    {isBalanceVisible ? user.userUsdtBalance + "$" : "****"}
+                    {isBalanceVisible ? balance + "" : "****"}
                   </h3>
                   <button
                     style={styles.eyeButton}

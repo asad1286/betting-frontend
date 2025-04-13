@@ -22,6 +22,7 @@ export const AdminProvider = ({ children }) => {
 
   });
   const [withdrawRequests, setWithdrawRequests] = useState([]);
+  const [invitationsAmounts, setInvitationsAmounts] = useState([]);
   const [btcGames, setBtcGames] = useState([]);
   const [timer, setTimer] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -77,6 +78,25 @@ export const AdminProvider = ({ children }) => {
           users: data.users,
           totalCount: data.totalCount
         })
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllInvitationsAmounts = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get('/admin/invitations');
+      const data = response.data;
+      console.log("invitations",data)
+
+      if (response.status === 200) {
+        setInvitationsAmounts(data.invitations)
       } else {
         throw new Error(response.data.message);
       }
@@ -156,6 +176,7 @@ export const AdminProvider = ({ children }) => {
     fetchWithdrawRequests();
     fetchAllBtcGames();
     fetchAllUsers();
+    fetchAllInvitationsAmounts();
     fetchSectionTimer();
   }, []);
 
@@ -213,6 +234,8 @@ export const AdminProvider = ({ children }) => {
         adminLogin,
         adminDetails,
         timer,
+        invitationsAmounts,
+        fetchAllInvitationsAmounts,
         fetchSectionTimer,
         btcGames,
         fetchAllBtcGames,

@@ -179,9 +179,9 @@ const Plans = () => {
             <tr style={styles.tableHeaderRow}>
               <th style={styles.tableHeader}>ID</th>
               <th style={styles.tableHeader}>Name</th>
-              <th style={styles.tableHeader}>Price</th>
+              <th style={styles.tableHeader}>Price(TRX)</th>
               <th style={styles.tableHeader}>Duration</th>
-              <th style={styles.tableHeader}>Daily Reward</th>
+              <th style={styles.tableHeader}>Daily Reward(TRX)</th>
               <th style={styles.tableHeader}>Action</th>
             </tr>
           </thead>

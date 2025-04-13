@@ -7,19 +7,26 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [balance, setBalance] = useState(0);
   const [timer, setTimer] = useState({});
   const [loading, setLoading] = useState(false);
    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const storedToken = Cookies.get('token',{ expires: 5 / 24 });
-    const storedUser = Cookies.get('user',{ expires: 5 / 24 });
-
+   useEffect(() => {
+    const storedToken = Cookies.get('token');
+    const storedUser = Cookies.get('user');
+    const storedBalance = Cookies.get('balance');
+  
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
     }
+  
+    if (storedBalance) {
+      setBalance(parseFloat(storedBalance));
+    }
   }, []);
+  
 
   // Function to fetch logged-in user's plans
 
@@ -50,7 +57,9 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       Cookies.set('token', token,{ expires: 5 / 24 });
       Cookies.set('user', JSON.stringify(response.data.user),{ expires: 5 / 24 });
-      console.log("token in context",token)
+      await fetchUserTRXBalance();
+      console.log('Login successful:', balance);
+      
       
 
       return { status: response.status, data: response.data };
@@ -62,6 +71,25 @@ export const AuthProvider = ({ children }) => {
       return { status: 500, message: "An unexpected error occurred." };
     }
   };
+
+  const fetchUserTRXBalance = async () => {
+    try {
+      const response = await axiosInstance.get('/auth/user/trx_balance');
+      if (response.data.success) {
+        const userUsdtBalance = response.data.userUsdtBalance;
+        console.log("Fetched balance from API:", userUsdtBalance);
+        setBalance(userUsdtBalance);
+        Cookies.set('balance', userUsdtBalance, { expires: 5 / 24 }); // store in cookies
+      } else {
+        console.error('Failed to fetch balance:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching balance:', error.message);
+    }
+  };
+  
+  
+  
 
   // Signup function
   const signup = async (firstName, lastName, email, phoneNumber, password, withdrawPassword, invitationCode) => {
@@ -88,10 +116,12 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
-    
+    setBalance(0);
     Cookies.remove('token');
     Cookies.remove('user');
+    Cookies.remove('balance');
   };
+  
 
   const fetchSectionTimer = async () => {
     setLoading(true);
@@ -123,6 +153,8 @@ useEffect(() => {
       signup, 
       timer,
       logout, 
+      balance,
+      fetchUserTRXBalance,
       isUserAutenticated,
       updateUser,
   

@@ -7,6 +7,7 @@ import axiosInstance from "./AxiosInstance";
 import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from "./contextApi/AuthContext";
 
 const globalStyles = {
   dark: {
@@ -42,6 +43,7 @@ const FreePlans = () => {
   const [isLoading, setIsLoading] = useState(false); // Added loading state
   const [userPlans, setUserPlans] = useState([]);
   const [theme, setTheme] = useState("dark");
+  const {fetchUserTRXBalance}=useAuth()
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [expandedFaqId, setExpandedFaqId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,7 +107,9 @@ const FreePlans = () => {
 
       if (response.status === 200) {
         await getLoggedInUserPlans(); // Add selected plan to userPlans
-        toast.success("Plan purchased successfully!"); // Show success toast
+        await fetchUserTRXBalance();
+        toast.success("Plan purchased successfully!");
+         // Show success toast
         closeModal(); // Close modal after confirmation
       }
 
@@ -113,7 +117,7 @@ const FreePlans = () => {
     } catch (error) {
       console.error("Error activating plan:", error);
       setIsLoading(false); // End loading even if there's an error
-      toast.error("An error occurred while activating the plan."); // Show error toast
+      toast.error(error?.response.data.message); // Show error toast
     }
   };
 

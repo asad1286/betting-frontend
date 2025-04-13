@@ -68,7 +68,7 @@ function App() {
             {/* PUBLIC ROUTES */}
             <Route path="/invite" element={<InvitePage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/btc-page" element={isBtcGameAvailable ? <BtcPage /> : <Navigate to="/" />} />
+            <Route path="/btc-page" element={<BtcPage /> } />
             <Route path="/free-plans" element={<FreePlans />} />
 
             {/* DEFAULT REDIRECTION */}

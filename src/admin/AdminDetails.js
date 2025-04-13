@@ -51,7 +51,7 @@ const AdminDetails = () => {
             <tr style={styles.tableHeaderRow}>
               <th style={styles.tableHeader}>Transaction ID</th>
               <th style={styles.tableHeader}>Type</th>
-              <th style={styles.tableHeader}>Amount (USDT)</th>
+              <th style={styles.tableHeader}>Amount (TRX)</th>
               <th style={styles.tableHeader}>Date</th>
             </tr>
           </thead>

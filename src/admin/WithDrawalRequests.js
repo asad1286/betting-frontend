@@ -95,8 +95,8 @@ const WithDrawalRequests = () => {
                             <th>ID</th>
                             <th>User ID</th>
                             <th>TRC20 Address</th>
-                            <th>Amount Request</th>
-                            <th>Amount Sent</th>
+                            <th>Amount Request(TRX)</th>
+                            <th>Amount Sent(TRX)</th>
                             <th>Date</th>
                             <th>Action</th>
                         </tr>
@@ -107,8 +107,8 @@ const WithDrawalRequests = () => {
                                 <td>{request.id}</td>
                                 <td>{request.userId}</td>
                                 <td>{request.trc20WithdrawAddress}</td>
-                                <td>${request.withdrawAmount}</td>
-                                <td>${request.amountSent}</td>
+                                <td>{request.withdrawAmount}</td>
+                                <td>{request.amountSent}</td>
                                 <td>{request.createdAt}</td>
                                 <td>
                                     {renderActionDropdown(request.status, request.id)}

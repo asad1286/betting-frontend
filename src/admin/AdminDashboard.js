@@ -8,6 +8,7 @@ import axiosInstance from "../AxiosInstance";
 import { toast, ToastContainer } from 'react-toastify';
 import BTCGames from "./BTCGames";
 import Plans from "./Plans";
+import InvitationsAmounts from "./InvitationsAmountsRequests";
 
 const AdminDashboard = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -80,6 +81,8 @@ const AdminDashboard = () => {
         return <WithDrawalRequests />;
       case "Plans":
         return <Plans />;
+      case "InvitationAmounts":
+        return <InvitationsAmounts/>;
       default:
         return <div>Welcome to the Admin Dashboard</div>;
     }
@@ -135,6 +138,7 @@ const AdminDashboard = () => {
           <li onClick={() => setActivePage("users")}>Users</li>
           <li onClick={() => setActivePage("WithDrawalRequests")}>Withdraw Requests</li>
           <li onClick={() => setActivePage("Plans")}>Plans</li>
+          <li onClick={() => setActivePage("InvitationAmounts")}>Invitations Amounts</li>
           {/* <li onClick={() => setActivePage("BTCGames")}>BTC Games</li> */}
           <li onClick={handleLogout}>Logout</li>
         </ul>
